@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/layotBackground"
     tools:context=".MainActivity">
 
     <Button
@@ -14,6 +15,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
+        android:onClick="SpravkaActivity"
         android:text="Справка"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,6 +27,7 @@
         android:layout_height="58dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
+        android:onClick="SettingActivity"
         android:text="Параметры"
         app:layout_constraintBottom_toTopOf="@+id/spravka_button_menu"
         app:layout_constraintEnd_toEndOf="@+id/spravka_button_menu"
@@ -36,6 +39,7 @@
         android:layout_height="58dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
+        android:onClick="RecieveActivity"
         android:text="Прием данных"
         app:layout_constraintBottom_toTopOf="@+id/parametry_button_menu"
         app:layout_constraintEnd_toEndOf="@+id/parametry_button_menu"
@@ -48,6 +52,7 @@
         android:layout_height="58dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
+        android:onClick="SendActivity"
         android:text="Передача данных"
         app:layout_constraintBottom_toTopOf="@+id/button_recieve_menu"
         app:layout_constraintEnd_toEndOf="@+id/button_recieve_menu"

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/layotBackground"
     android:visibility="visible"
     tools:context=".MainActivitySend"
     tools:visibility="visible">
@@ -32,7 +33,7 @@
         android:layout_width="385dp"
         android:layout_height="1dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="64dp"
         android:background="@color/Divider"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,7 +46,7 @@
         android:layout_width="385dp"
         android:layout_height="1dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="64dp"
         android:background="@color/Divider"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,24 +58,21 @@
         android:id="@+id/LabelCommunication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="45dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="Коммуникация с устройством"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/switchSend"
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <CheckBox
         android:id="@+id/nameDeviceConnectSend"
         android:layout_width="332dp"
         android:layout_height="45dp"
-        android:layout_marginStart="45dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="44dp"
         android:text="Имя устройства"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/InfoAboutCommunication"
         app:layout_constraintTop_toBottomOf="@+id/InfoAboutCommunication"
         tools:visibility="invisible" />
 
@@ -82,50 +80,62 @@
         android:id="@+id/InfoAboutCommunication"
         android:layout_width="335dp"
         android:layout_height="43dp"
-        android:layout_marginStart="50dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="44dp"
         android:text="Нажмите на имя устройства, чтобы получить детальную информацию"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
         app:layout_constraintTop_toBottomOf="@+id/LabelCommunication" />
 
     <TextView
         android:id="@+id/InfoLabelSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="45dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="Отправка"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/nameDeviceConnectSend"
         app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
     <Button
-        android:background="@color/buttonBackground"
         android:id="@+id/button_AddFile"
-        android:layout_width="385dp"
+        android:layout_width="325dp"
         android:layout_height="58dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
+        android:background="@color/buttonBackground"
         android:text="Добавить файлы"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:background="@color/buttonBackground"
         android:id="@+id/button_Send"
-        android:layout_width="385dp"
+        android:layout_width="325dp"
         android:layout_height="58dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
+        android:background="@color/buttonBackground"
         android:text="Отправить"
         app:layout_constraintBottom_toTopOf="@+id/button_AddFile"
+        app:layout_constraintEnd_toEndOf="@+id/button_AddFile"
+        app:layout_constraintStart_toStartOf="@+id/button_AddFile" />
+
+    <ScrollView
+        android:id="@+id/ScrollSend"
+        android:layout_width="409dp"
+        android:layout_height="243dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/button_Send"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"></LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
-    <color name="buttonBackground">#B5AFB4AF</color>
-    <color name="Divider">#B58B928B</color>
+    <color name="colorPrimary">#3F9F66</color>
+    <color name="colorPrimaryDark">#9BB8A6</color>
+    <color name="colorAccent">#A65541</color>
+    <color name="buttonBackground">#D8C1F5C4</color>
+    <color name="layotBackground">#FFF1E1</color>
+    <color name="Divider">#FFD3C9</color>
 </resources>

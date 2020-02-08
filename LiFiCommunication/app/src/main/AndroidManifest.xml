@@ -9,7 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivitySend"></activity>
+        <activity android:name=".MainActivitySpravka"></activity>
+        <activity android:name=".MainActivitySetting" />
+        <activity android:name=".MainActivityRecieve" />
+        <activity android:name=".MainActivitySend" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
