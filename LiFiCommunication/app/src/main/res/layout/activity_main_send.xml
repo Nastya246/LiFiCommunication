@@ -104,6 +104,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
+        android:onClick="AddFile"
         android:text="Добавить файлы"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -122,20 +123,29 @@
 
     <ScrollView
         android:id="@+id/ScrollSend"
-        android:layout_width="409dp"
-        android:layout_height="243dp"
-        android:layout_marginStart="1dp"
+        android:layout_width="318dp"
+        android:layout_height="114dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="2dp"
-        android:layout_marginEnd="1dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/button_Send"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.36"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend">
+        app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend"
+        app:layout_constraintVertical_bias="1.0">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
+        <TextView
+            android:id="@+id/InfoAddFiles"
+            android:layout_width="319dp"
+            android:layout_height="43dp"
+            android:layout_marginTop="16dp"
+            android:singleLine="false"
+            android:text="Здесь будут отображены выбранные вами файлы для отправки"
+            android:scrollbars="vertical"
+            android:scrollHorizontally="false"
+            app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
+            app:layout_constraintTop_toBottomOf="@+id/LabelCommunication" />
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
