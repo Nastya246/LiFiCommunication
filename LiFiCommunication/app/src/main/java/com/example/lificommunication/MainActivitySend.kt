@@ -7,7 +7,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_send.*
+import java.util.*
 import kotlin.experimental.xor
+
 
 class RC4 ( key: ByteArray){
     var Perestanovki= IntArray (256, {0})
@@ -82,6 +84,56 @@ class MainActivitySend : AppCompatActivity() {
         }
     }
 
+   fun packageCreate(dataUsers: ByteArray): BitSet  {
+
+// byteArraySend:Array<Array <Byte>>
+        var t: Int = 0
+        var predel: Int = 0
+        var count: Int = 0
+        var size=(dataUsers.size*8)/110 //количество битовых посылок
+        var fromIndex: Int = 0 * 8 + 0
+        val sendPack: BitSet= (BitSet.valueOf(dataUsers)).get(fromIndex, fromIndex+110) //получаем набор битов
+        var sendPackTemp:BitSet= BitSet() //для хранения посылки с доп. битами, crc и старт, стоп битами
+        var crcArray= ByteArray (2, {0})
+        if (size >1) {predel=110} //значит больше 1 посылки
+        else {predel=dataUsers.size*8} //если меньше 110 бит
+
+        for (n in 0..109) {
+            if (n == 0) {
+                sendPackTemp[count] = true //старт бит
+                count++
+                sendPackTemp[count] = false //доп.бит
+                count++
+            }
+        if (n>predel) {
+            sendPackTemp[count] = false //бит данных
+            count++
+            sendPackTemp[count] = true
+            count++
+        }
+
+            else {
+            sendPackTemp[count] = sendPack[n] //бит данных
+            count++
+            if (sendPack[n] == true) { //доп. бит
+                sendPackTemp[count] = false
+            } else {
+                sendPackTemp[count] = true
+            }
+            count++
+        }
+            if (n == 109) //стоп-бит
+            {
+                sendPackTemp[count] = false
+                count++
+                sendPackTemp[count] = true
+            }
+
+        }
+
+        return sendPackTemp
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -119,16 +171,17 @@ class MainActivitySend : AppCompatActivity() {
                     var byteArraySend = ByteArray (256, {0}) //этот массив хранит посылку
                     var keyForUnits = "Light".toByteArray(); //это ключ для шифрования
                     var encoder: RC4=RC4(keyForUnits)
-                    var encoderResult=encoder.Encode(nameFileStr, nameFileStr.size)
+                    var encoderResult=encoder.Encode(nameFileStr, nameFileStr.size) //шифрование имени файла
+                    var sendPack=packageCreate(encoderResult)
 
-                    var resultstrEncoder=encoderResult.toString(Charsets.UTF_8) //смотрим что получили после шифрования
+                        /*  var resultstrEncoder=encoderResult.toString(Charsets.UTF_8) //смотрим что получили после шифрования
 
 
                     var decoder: RC4=RC4(keyForUnits)
                     var decoderResult=decoder.Decode(encoderResult, encoderResult.size)
 
                     var resultstrDecoder=decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-                    var temp1=resultstrDecoder
+                    var temp1=resultstrDecoder */
                 }
 
             }
