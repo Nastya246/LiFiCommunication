@@ -223,7 +223,7 @@ fun CrcPack (packData:BitSet): BitSet //подсчет crc и преобразо
                     var arrayNameExection=nameFile.split('.') //разбиваем на массив
                     var nameFileStr=arrayNameExection[0].toByteArray() //имя
                     var exectionFileStr=arrayNameExection[1].toByteArray() //расширение без точки
-                    var byteArraySend = ByteArray (256, {0}) //этот массив хранит посылку
+
 
                     var keyForUnitsName = "LightName".toByteArray(); //это ключ для шифрования имени файла
                     var encoderN: RC4=RC4(keyForUnitsName)
