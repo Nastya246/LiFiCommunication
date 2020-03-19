@@ -1,5 +1,4 @@
 package com.example.lificommunication
-
 import android.content.Intent
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -8,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_send.*
 import java.util.*
+import java.util.zip.CRC32
 import kotlin.experimental.xor
 
 var ListArraySend = arrayListOf<Array<BitSet>>()
@@ -63,7 +63,6 @@ class RC4 ( key: ByteArray){
     }
 }
 
-
 class MainActivitySend : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,111 +83,111 @@ class MainActivitySend : AppCompatActivity() {
     }
 fun CrcPack (packData:BitSet): BitSet //подсчет crc и преобразование ее в биты
 {
-    //11000000000000101
-   /* var Polinom:BitSet= BitSet(17)
-    Polinom[0]=true
-    Polinom[1]=true
-    Polinom[2]=false
-    Polinom[3]=false
-    Polinom[4]=false
-    Polinom[5]=false
-    Polinom[6]=false
-    Polinom[7]=false
-    Polinom[8]=false
-    Polinom[9]=false
-    Polinom[10]=false
-    Polinom[11]=false
-    Polinom[12]=false
-    Polinom[13]=false
-    Polinom[14]=true
-    Polinom[15]=false
-    Polinom[16]=true*/
+    var DataIntFormat :Int=0
     var Polinom:Int=98309
+    for (n in 0..223) //в десятичное число данные
+    {
+        var temp:Int=0
+        if (packData[n]) temp=1
+        else temp=0
+        DataIntFormat+=temp.shl(n)
+    }
+    var crcInt:Int=DataIntFormat%Polinom //получаем crc
+    var crcPackString=crcInt.toString()
+    var crcIntArrayPack= Array<Byte>(crcPackString.length,{0})
+    for (n in 0..(crcPackString.length-1))
+    {
+    crcIntArrayPack[n]=crcPackString[n].toInt().toByte()
+    }
+    var crcBit: BitSet= (BitSet.valueOf(crcIntArrayPack.toByteArray())).get(0, crcIntArrayPack.size) // crc в битах
 
-
-    //int n, sum=0; // n - количество бит, sum это наше десятичное число которое получится из двоичного
-   // char ch[n];//  это наше двоичное число. число символов рано n из предыдущей строки
-//for (n in packData.size()-1..-1)
-  //  for (i=n-1;i>-1;i--)//    пошли по строке бит
-   // if (ch[i]=='1')   // если i-й бит в строке = 1 ,
-      //  sum+=pow(2,i) ;// то прибавить к общей сумме 2 в степени i
-   // var crcInt=packData.toLongArray() % Polinom
-  //  var crcByteArrayPack=crcInt.toString().toByteArray()
-  //  var crcBit: BitSet= (BitSet.valueOf(crcByteArrayPack)).get(0, crcByteArrayPack.size)
-  //  return crcBit
+    return crcBit
 }
-   fun packageCreate(dataUsers: ByteArray)  {
+   fun packageCreate(dataUsers: ByteArray) {
 
-        var countIndex :Int=0
+       var countIndex: Int = 0
+       var predel: Int = 0
+       var count: Int = 0
+       var size = (dataUsers.size * 8) / 110 //количество битовых посылок
+       countIndex = size //число посылок
+       var outCircle: Int = 0 //переменная внешнего цикла
+       if (size == 0) countIndex = 0
 
-        var predel: Int = 0
-        var count: Int = 0
-        var size=(dataUsers.size*8)/110 //количество битовых посылок
-        countIndex=size //число посылок
-        var outCircle:Int=0 //переменная внешнего цикла
-        if (size==0) countIndex=0
+       var UnitPackSend: Array<BitSet> // для записи частей посылки
+       var fromIndex: Int = 0 * 8 + 0
+       val sendPack: BitSet =
+           (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем набор битов
+       var sendPackTemp: BitSet =
+           BitSet(256) //для хранения посылки с доп. битами, crc и старт, стоп битами
 
-        var UnitPackSend: Array<BitSet> // для записи частей посылки
-        var fromIndex: Int = 0 * 8 + 0
-        val sendPack: BitSet= (BitSet.valueOf(dataUsers)).get(fromIndex, fromIndex+110) //получаем набор битов
-        var sendPackTemp:BitSet= BitSet() //для хранения посылки с доп. битами, crc и старт, стоп битами
-
-       while (outCircle<=size) {
-           if (size <=1) //меньше одной посылки
-           {predel=dataUsers.size*8} //если меньше 110 бит
-           else
+       while (outCircle <= size) {
+           if (size <= 1) //меньше одной посылки
            {
-               predel=110+(countIndex*outCircle)
+               predel = dataUsers.size * 8
+           } //если меньше 110 бит
+           else {
+               predel = 110 + (countIndex * outCircle)
            }
-            for (n in (0 + countIndex*outCircle)..(109 + (countIndex*outCircle))) { //для одной посылки
-                if (n == 0 + countIndex*outCircle) {
-                    sendPackTemp[count] = true //старт бит
-                    count++
-                    sendPackTemp[count] = false //доп.бит
-                    count++
-                }
-                if (n > predel) {
-                    sendPackTemp[count] = false //бит данных
-                    count++
-                    sendPackTemp[count] = true
-                    count++
-                } else {
-                    sendPackTemp[count] = sendPack[n] //бит данных
-                    count++
-                    if (sendPack[n] == true) { //доп. бит
-                        sendPackTemp[count] = false
-                    } else {
-                        sendPackTemp[count] = true
-                    }
-                    count++
-                }
-                if (n == 109 + countIndex*outCircle) //стоп-бит
-                {
-                    sendPackTemp[count] = false
-                    count++
-                    sendPackTemp[count] = true
-                }
-            }
-            outCircle++
-           var countThirdCircleForCrc:Int= outCircle*countIndex+109
-           var crcForPack=CrcPack(sendPackTemp) //получили crc
-           var sizeCircle=crcForPack.size()*8
+           for (n in (0 + countIndex * outCircle)..(109 + (countIndex * outCircle))) { //для одной посылки
+               if (n == 0 + countIndex * outCircle) {
+                   sendPackTemp[count] = true //старт бит
+                   count++
+                   sendPackTemp[count] = false //доп.бит
+                   count++
+               }
+               if (n > predel) {
+                   sendPackTemp[count] = false //бит данных
+                   count++
+                   sendPackTemp[count] = true
+                   count++
+               } else {
+                   sendPackTemp[count] = sendPack[n] //бит данных
+                   count++
+                   if (sendPack[n] == true) { //доп. бит
+                       sendPackTemp[count] = false
+                   } else {
+                       sendPackTemp[count] = true
+                   }
+                   count++
+               }
+               if (n == 109 + countIndex * outCircle) //стоп-бит
+               {
+                   sendPackTemp[count] = false
+                   count++
+                   sendPackTemp[count] = true
+               }
+           }
+           outCircle++
+           var countThirdCircleForCrc: Int = outCircle * countIndex + 110
+           var crcForPack = CrcPack(sendPackTemp) //получили crc
+           var sizeCircle = crcForPack.length()
+           if (crcForPack.length() < 16) {
+               for (n in 0..(16-crcForPack.length()-1)) //добавляем доп нули
+               {
+                   sendPackTemp[countThirdCircleForCrc] = false
+                   countThirdCircleForCrc++
+                   sendPackTemp[countThirdCircleForCrc] = true
+                   countThirdCircleForCrc++
+
+               }
+           }
            for (n in 0..(sizeCircle)) //добавляем в посылку crc
            {
-               sendPackTemp[countThirdCircleForCrc]=crcForPack[n]
+               sendPackTemp[countThirdCircleForCrc] = crcForPack[n]
                countThirdCircleForCrc++
-               if (n==sizeCircle-1) //стоп-бит
+               if (n == sizeCircle - 1) //стоп-бит
                {
                    sendPackTemp[countThirdCircleForCrc++] = false
                    countThirdCircleForCrc++
-                   sendPackTemp[ countThirdCircleForCrc++] = true
+                   sendPackTemp[countThirdCircleForCrc++] = true
                }
            }
-       }
-       UnitPackSend = arrayOf(sendPackTemp)
-       ListArraySend.add(UnitPackSend) //добавляем в глобальную переменную преобразованные данные
 
-    }
+           UnitPackSend = arrayOf(sendPackTemp)
+           ListArraySend.add(UnitPackSend) //добавляем в глобальную переменную преобразованные данные
+
+       }
+   }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -223,21 +222,39 @@ fun CrcPack (packData:BitSet): BitSet //подсчет crc и преобразо
                     var nameFile= returnCursor.getString(nameIndex) //имя и расширение вместе
                     var arrayNameExection=nameFile.split('.') //разбиваем на массив
                     var nameFileStr=arrayNameExection[0].toByteArray() //имя
-                    var exectionFileStr=arrayNameExection[1] //расширение без точки
+                    var exectionFileStr=arrayNameExection[1].toByteArray() //расширение без точки
                     var byteArraySend = ByteArray (256, {0}) //этот массив хранит посылку
-                    var keyForUnits = "Light".toByteArray(); //это ключ для шифрования
-                    var encoder: RC4=RC4(keyForUnits)
-                    var encoderResult=encoder.Encode(nameFileStr, nameFileStr.size) //шифрование имени файла
-                    packageCreate(encoderResult) //формирование посылки
 
-                        /*  var resultstrEncoder=encoderResult.toString(Charsets.UTF_8) //смотрим что получили после шифрования
+                    var keyForUnitsName = "LightName".toByteArray(); //это ключ для шифрования имени файла
+                    var encoderN: RC4=RC4(keyForUnitsName)
+                    var encoderResultNameFile=encoderN.Encode(nameFileStr, nameFileStr.size) //шифрование имени файла
 
+                    var keyForUnitsFormat = "LightFormat".toByteArray(); //это ключ для шифрования формата файла
+                    var encoderF: RC4=RC4(keyForUnitsFormat)
+                    var encoderResultFormatFile=encoderF.Encode(exectionFileStr, exectionFileStr.size) //шифрование формата файла
 
-                    var decoder: RC4=RC4(keyForUnits)
-                    var decoderResult=decoder.Decode(encoderResult, encoderResult.size)
+                    var keyForUnitsFile = "LightFile".toByteArray(); //это ключ для шифрования данных файла
+                    var encoderFile: RC4=RC4(keyForUnitsFile)
+                    var encoderResultFile=encoderFile.Encode(fileUser, fileUser.size) //шифрование файла
 
+                    packageCreate(encoderResultNameFile) //формирование посылки для имени
+                    packageCreate(encoderResultFormatFile) // для формата
+                    packageCreate(encoderResultFile) // для файла
+
+                        /*схема дешифрования:
+                    var decoder: RC4=RC4(keyForUnitsName)
+                    var decoderResult=decoder.Decode(encoderResultNameFile, encoderResultNameFile.size)
                     var resultstrDecoder=decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-                    var temp1=resultstrDecoder */
+
+
+                    var decoderF: RC4=RC4(keyForUnitsFormat)
+                    decoderResult=decoderF.Decode(encoderResultFormatFile, encoderResultFormatFile.size)
+                    var resultstrDecoderF=decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+
+                    var decoderFile: RC4=RC4(keyForUnitsFile)
+                    decoderResult=decoderFile.Decode(encoderResultFile, encoderResultFile.size)
+                    var resultstrDecoderFile=decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                    var t3=resultstrDecoderFile*/
                 }
 
             }
