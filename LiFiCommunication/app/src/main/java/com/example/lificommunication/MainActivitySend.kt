@@ -10,15 +10,19 @@ import android.media.AudioManager.AUDIO_SESSION_ID_GENERATE
 import android.media.AudioTrack
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_send.*
 import java.util.*
+import kotlin.concurrent.thread
 import kotlin.experimental.xor
+import kotlinx.coroutines.*
 
 
-    var ListArraySend = arrayListOf<BitSet>()
+
+var ListArraySend = arrayListOf<BitSet>()
     class RC4 ( key: ByteArray){
         var Perestanovki= IntArray (256, {0})
         var x: Int = 0
@@ -77,21 +81,31 @@ import kotlin.experimental.xor
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main_send)
         }
+
         val arrayFiles = arrayOfNulls<String>(3)
         var count: Int = 0
         fun AddFile(view: View) {
-            val intent = Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT)//Выбор любого типа файла
+            val intent = Intent().setType("*/*")
+                .setAction(Intent.ACTION_GET_CONTENT)//Выбор любого типа файла
 
             try {
                 startActivityForResult(Intent.createChooser(intent, "Выберите файл..."), 111)
             } catch (e: Exception) {
-                Toast.makeText(this, "Пожалуйста установите файловый менеджер.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Пожалуйста установите файловый менеджер.", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
-        fun SendData(view: View) {
-                for (n in ListArraySend) SendInformation(n.toByteArray())
+        fun SendData(view: View) = runBlocking {
+
+            val taskSend = GlobalScope.launch {
+                for (n in ListArraySend) {
+                    SendInformation(n.toByteArray())
+                }
+            }
+            taskSend.join()
         }
+
 
         fun CrcPack (packData:BitSet): BitSet //подсчет crc и преобразование ее в биты
         {
@@ -205,7 +219,7 @@ import kotlin.experimental.xor
            }
         }
 
-        fun SendInformation(dataUsersFoJack: ByteArray) {
+       suspend fun SendInformation(dataUsersFoJack: ByteArray) {
             var buffersize = AudioTrack.getMinBufferSize(8000,  //устанавливаем частоту с запасом
                 AudioFormat.CHANNEL_OUT_MONO, // данные идут в левый канал, поэтому моно
                 AudioFormat.ENCODING_PCM_16BIT)

@@ -124,15 +124,14 @@
 
     <ScrollView
         android:id="@+id/ScrollSend"
-        android:layout_width="318dp"
+        android:layout_width="0dp"
         android:layout_height="114dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="2dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/button_Send"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.36"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/InfoLabelSend"
         app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend"
         app:layout_constraintVertical_bias="1.0">
 
@@ -141,10 +140,10 @@
             android:layout_width="319dp"
             android:layout_height="43dp"
             android:layout_marginTop="16dp"
-            android:singleLine="false"
-            android:text="Здесь будут отображены выбранные вами файлы для отправки"
             android:scrollbars="vertical"
             android:scrollHorizontally="false"
+            android:singleLine="false"
+            android:text="Здесь будут отображены выбранные вами файлы для отправки"
             app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
             app:layout_constraintTop_toBottomOf="@+id/LabelCommunication" />
     </ScrollView>
