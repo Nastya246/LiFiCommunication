@@ -125,8 +125,8 @@
     <ScrollView
         android:id="@+id/ScrollSend"
         android:layout_width="0dp"
-        android:layout_height="114dp"
-        android:layout_marginTop="2dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/button_Send"
         app:layout_constraintEnd_toEndOf="parent"

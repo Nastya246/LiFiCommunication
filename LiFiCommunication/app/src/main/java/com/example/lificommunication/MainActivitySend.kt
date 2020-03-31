@@ -97,7 +97,6 @@ var ListArraySend = arrayListOf<BitSet>()
         }
 
         fun SendData(view: View) = runBlocking {
-
             val taskSend = GlobalScope.launch {
                 for (n in ListArraySend) {
                     SendInformation(n.toByteArray())
@@ -105,7 +104,6 @@ var ListArraySend = arrayListOf<BitSet>()
             }
             taskSend.join()
         }
-
 
         fun CrcPack (packData:BitSet): BitSet //подсчет crc и преобразование ее в биты
         {
@@ -253,11 +251,7 @@ var ListArraySend = arrayListOf<BitSet>()
                     }
                     arrayFiles.set(count, selectedFile.toString())
                     count++
-                    if(count === 1) InfoAddFiles.text = matchResult.value
-                    else {
-                        InfoAddFiles.append(System.getProperty("line.separator"))
-                        InfoAddFiles.append(matchResult.value)
-                    }
+
 
                     if (selectedFile!=null) //если выбраны файлы
                     { //получаем поток байт из  файла
@@ -269,6 +263,14 @@ var ListArraySend = arrayListOf<BitSet>()
                             var nameIndex=returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                             returnCursor.moveToFirst()
                             var nameFile= returnCursor.getString(nameIndex) //имя и расширение вместе
+
+
+                            if(count === 1) InfoAddFiles.text = nameFile //вывод имени файла
+                            else {
+                                InfoAddFiles.append(System.getProperty("line.separator"))
+                                InfoAddFiles.append(nameFile)
+                            }
+
                             var arrayNameExection=nameFile.split('.') //разбиваем на массив
                             var nameFileStr=arrayNameExection[0].toByteArray() //имя
                             var exectionFileStr=arrayNameExection[1].toByteArray() //расширение без точки
