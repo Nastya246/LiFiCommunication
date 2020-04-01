@@ -17,6 +17,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="64dp"
         android:buttonTint="#00FFC107"
+        android:checked="true"
         android:text="Передача данных"
         android:textAlignment="textStart"
         android:textOff="Выкл"

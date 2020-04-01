@@ -27,7 +27,8 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
-        android:text="Отмена"
+        android:onClick="MainActivityActivity"
+        android:text="В меню"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
