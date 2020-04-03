@@ -14,7 +14,6 @@ import android.provider.OpenableColumns
 import android.view.Gravity
 import android.view.View
 import android.widget.Switch
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_send.*
