@@ -161,9 +161,9 @@ class MainActivitySend : AppCompatActivity() {
             showWarning.show()
         }
         else {
-        val taskSend = GlobalScope.launch {
-            if (flagSend) sendInformation()
-        } } }
+            val taskSend = GlobalScope.launch {
+                if (flagSend) sendInformation()
+            } } }
 
     fun packageCreate(dataUsers: ByteArray) {
         var countIndex = 0
@@ -264,13 +264,13 @@ class MainActivitySend : AppCompatActivity() {
                     0,
                     buffersize) // пишем данные в цап мобильного
                 withContext(Dispatchers.Main) {
-                        var arrayText = InfoAddFiles.text.split("...")
-                        InfoAddFiles.setTextColor(Color.BLUE)
-                        if (count>procent) {
-                            procentSend++
-                            procent+=procentSource
-                        }
-                        InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача " + procentSend.toString()+ "%")
+                    var arrayText = InfoAddFiles.text.split("...")
+                    InfoAddFiles.setTextColor(Color.BLUE)
+                    if (count>procent) {
+                        procentSend++
+                        procent+=procentSource
+                    }
+                    InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача " + procentSend.toString()+ "%")
                 }
                 count++
             } else {
