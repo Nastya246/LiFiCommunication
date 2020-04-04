@@ -100,13 +100,14 @@
     <Button
         android:id="@+id/button_AddFile"
         android:layout_width="325dp"
-        android:layout_height="58dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
         android:onClick="addFile"
         android:text="Добавить файлы"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -114,11 +115,12 @@
     <Button
         android:id="@+id/button_Send"
         android:layout_width="325dp"
-        android:layout_height="58dp"
+        android:layout_height="50dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
         android:onClick="sendData"
         android:text="Отправить"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/button_AddFile"
         app:layout_constraintEnd_toEndOf="@+id/button_AddFile"
         app:layout_constraintStart_toStartOf="@+id/button_AddFile" />

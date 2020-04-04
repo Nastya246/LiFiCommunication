@@ -10,13 +10,14 @@
     <Button
         android:id="@+id/button_CloseSpravka"
         android:layout_width="325dp"
-        android:layout_height="58dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
         android:onClick="SendMain"
         android:text="Ок"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

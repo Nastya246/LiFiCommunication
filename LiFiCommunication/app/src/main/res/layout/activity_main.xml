@@ -10,13 +10,14 @@
     <Button
         android:id="@+id/spravka_button_menu"
         android:layout_width="325dp"
-        android:layout_height="58dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
         android:onClick="SpravkaActivity"
         android:text="Справка"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -24,11 +25,12 @@
     <Button
         android:id="@+id/parametry_button_menu"
         android:layout_width="325dp"
-        android:layout_height="58dp"
-        android:layout_marginBottom="32dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
         android:onClick="SettingActivity"
         android:text="Параметры"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/spravka_button_menu"
         app:layout_constraintEnd_toEndOf="@+id/spravka_button_menu"
         app:layout_constraintStart_toStartOf="@+id/spravka_button_menu" />
@@ -36,11 +38,12 @@
     <Button
         android:id="@+id/button_recieve_menu"
         android:layout_width="325dp"
-        android:layout_height="58dp"
-        android:layout_marginBottom="32dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
         android:onClick="RecieveActivity"
         android:text="Прием данных"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/parametry_button_menu"
         app:layout_constraintEnd_toEndOf="@+id/parametry_button_menu"
         app:layout_constraintHorizontal_bias="0.0"
@@ -49,14 +52,27 @@
     <Button
         android:id="@+id/send_button_menu"
         android:layout_width="325dp"
-        android:layout_height="58dp"
-        android:layout_marginBottom="32dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
         android:onClick="SendActivity"
         android:text="Передача данных"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/button_recieve_menu"
         app:layout_constraintEnd_toEndOf="@+id/button_recieve_menu"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="@+id/button_recieve_menu" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="341dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/send_button_menu"
+        app:layout_constraintEnd_toEndOf="@+id/send_button_menu"
+        app:layout_constraintStart_toStartOf="@+id/send_button_menu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/lf" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

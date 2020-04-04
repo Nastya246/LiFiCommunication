@@ -9,6 +9,7 @@ import android.media.AudioFormat.ENCODING_PCM_16BIT
 import android.media.AudioManager.AUDIO_SESSION_ID_GENERATE
 import android.media.AudioManager.STREAM_MUSIC
 import android.media.AudioTrack
+import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.Gravity
@@ -21,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
@@ -136,10 +138,9 @@ class MainActivitySend : AppCompatActivity() {
                     showWarning.show()
                 } } } }
 
-    private val arrayFiles = arrayOfNulls<String>(3)
+    private val arrayFiles = arrayOfNulls<Uri>(3)
     private var count: Int = 0
     private var flagSend: Boolean = true
-    private var flagSendComplete: Int = 0
     fun addFile(view: View) {
         val intent = Intent().setType("*/*")
             .setAction(Intent.ACTION_GET_CONTENT) //Выбор любого типа файла
@@ -170,22 +171,19 @@ class MainActivitySend : AppCompatActivity() {
         var predel = 0
         var count = 0
         var size = (dataUsers.size * 8) / 110 //количество битовых посылок
-        countIndex = size //число посылок
+        countIndex = 1 //переменная для цикла
         var outCircle = 0 //переменная внешнего цикла для  подсчета посылок
-        if (size == 0) countIndex = 0
-
         var unitPackSend: BitSet // для записи частей посылки
         var fromIndex: Int = 0 * 8 + 0
         val sendPack: BitSet =
             (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем набор битов
         var sendPackTemp: BitSet =
             BitSet(256) //для хранения посылки с доп. битами, crc и старт, стоп битами
-
-        while (outCircle <= size) {
+        while (outCircle <= size-1) {
             if (size <= 1) predel = dataUsers.size * 8 //меньше одной посылки
-            else predel = 110 + (countIndex * outCircle) //если меньше 110 бит
-            for (n in (0 + countIndex * outCircle)..(109 + (countIndex * outCircle))) { //для одной посылки
-                if (n == 0 + countIndex * outCircle) {
+            else predel = 110 *countIndex // 110 бит
+            for (n in (110 * outCircle)..(109 * countIndex+outCircle)) { //для одной посылки
+                if (n == 110 * outCircle) {
                     sendPackTemp[count] = true //старт бит
                     count++
                     sendPackTemp[count] = false //доп.бит
@@ -203,14 +201,15 @@ class MainActivitySend : AppCompatActivity() {
                     else sendPackTemp[count] = true
                     count++
                 }
-                if (n == 109 + countIndex * outCircle) { //стоп-бит
+                if (n == 109 * countIndex+outCircle) { //стоп-бит
                     sendPackTemp[count] = false
                     count++
                     sendPackTemp[count] = true
                 }
             }
-            outCircle++  //получили посылку без crc
-            var countThirdCircleForCrc: Int = outCircle * countIndex + 110
+          //получили посылку без crc
+            var countThirdCircleForCrc: Int = outCircle + countIndex * 109+3
+            outCircle++
             var crcForPack = crcPack(sendPackTemp) //получили crc
             var sizeCircle = crcForPack.length()
             if (crcForPack.length() < 16) { //если crc меньше 16 бит
@@ -232,12 +231,13 @@ class MainActivitySend : AppCompatActivity() {
             }
             unitPackSend = sendPackTemp
             ListArraySend.add(unitPackSend) //добавляем в глобальную переменную преобразованные данные для дальнейшей отправки
+            countIndex++
         }
     }
 
     suspend fun sendInformation() {
         var buffersize = AudioTrack.getMinBufferSize(
-            8000,  //устанавливаем частоту с запасом
+            44100,  //устанавливаем частоту с запасом
             AudioFormat.CHANNEL_OUT_MONO, // данные идут в левый канал, поэтому моно
             AudioFormat.ENCODING_PCM_16BIT)
         var trackplayer = AudioTrack(
@@ -247,35 +247,28 @@ class MainActivitySend : AppCompatActivity() {
                 .build(),
             AudioFormat.Builder().setEncoding(ENCODING_PCM_16BIT)
                 .setChannelMask(CHANNEL_OUT_MONO)
-                .setSampleRate(8000)
+                .setSampleRate(44100)
                 .build(),
             buffersize,
             AudioTrack.MODE_STREAM,
             AUDIO_SESSION_ID_GENERATE)
         trackplayer.play() // включаем проигрывание
-        var count:Double=0.0
-        var procentSend=0
-        var procent:Double=0.01* ListArraySend.count()
-        var procentSource=procent
-        for (n in ListArraySend) {
+        var arrayData: BitSet = BitSet(ListArraySend.count()*256)
+        var tempcountArray=0
+        withContext(Dispatchers.Main) {
+            var arrayText = InfoAddFiles.text.split("...")
+            InfoAddFiles.setTextColor(Color.BLUE)
+            InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Подготовка данных " )
+        }
+        for (n in ListArraySend)
+        {
             if (flagSend) {
-                trackplayer.write(
-                    n.toByteArray(),
-                    0,
-                    buffersize) // пишем данные в цап мобильного
-                withContext(Dispatchers.Main) {
-                    var arrayText = InfoAddFiles.text.split("...")
-                    InfoAddFiles.setTextColor(Color.BLUE)
-                    if (count>procent) {
-                        procentSend++
-                        procent+=procentSource
-                    }
-                    InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача " + procentSend.toString()+ "%")
-                }
-                count++
-            } else {
-                trackplayer.stop() //останавливаем
-                trackplayer.release()
+                for (t in 0..255) {
+                    arrayData[tempcountArray] = n[t]
+                    tempcountArray++
+                } }
+            else
+            {
                 withContext(Dispatchers.Main)
                 {
                     var arrayText = InfoAddFiles.text.split("...")
@@ -284,13 +277,33 @@ class MainActivitySend : AppCompatActivity() {
                 }
                 return
             } }
-
-        withContext(Dispatchers.Main)
-        {
-            var arrayText = InfoAddFiles.text.split("...")
-            InfoAddFiles.setTextColor(Color.GREEN)
-            InfoAddFiles.setText(arrayText[0]+ " ... Готово!")
-        }}
+        if (flagSend) {
+            withContext(Dispatchers.Main) {
+                var arrayText = InfoAddFiles.text.split("...")
+                InfoAddFiles.setTextColor(Color.BLACK)
+                InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача" )
+            }
+            trackplayer.write(
+                arrayData.toByteArray(),
+                0,
+                buffersize
+            ) // пишем данные в цап мобильного
+            withContext(Dispatchers.Main)
+            {
+                var arrayText = InfoAddFiles.text.split("...")
+                InfoAddFiles.setTextColor(Color.GREEN)
+                InfoAddFiles.setText(arrayText[0].trimEnd()+ " ... Готово!")
+            }
+        }
+        else {
+            withContext(Dispatchers.Main)
+            {
+                var arrayText = InfoAddFiles.text.split("...")
+                InfoAddFiles.setTextColor(Color.RED)
+                InfoAddFiles.setText(arrayText[0].trimEnd()+" ... Прервано")
+            }
+            return
+        } }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -307,13 +320,15 @@ class MainActivitySend : AppCompatActivity() {
                 return
             }
 
-            arrayFiles.set(count, selectedFile.toString())
+            arrayFiles[count]=selectedFile
             count++
-
-            if (selectedFile != null) {//если выбраны файлы получаем поток байт из  файла
-                val fileUser= contentResolver.openInputStream(selectedFile)?.readBytes() //получаем поток байт из  файла
+            for (file in arrayFiles) {
+            if (file != null) {//если выбраны файлы получаем поток байт из  файла
+                if ((file==arrayFiles[0] && arrayFiles[1]==null && arrayFiles[2]==null) || (file==arrayFiles[1] && arrayFiles[0]!=null && arrayFiles[2]==null) || (file==arrayFiles[2] && arrayFiles[1]!=null && arrayFiles[0]!==null))
+                {
+                val fileUser= contentResolver.openInputStream(file)?.readBytes() //получаем поток байт из  файла
                 if (fileUser != null) {//если файл не пустой, то: получаем имя и расширение
-                    var returnCursor = contentResolver.query(selectedFile, null, null, null, null);
+                    var returnCursor = contentResolver.query(file, null, null, null, null);
                     var nameIndex = returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     returnCursor.moveToFirst()
                     var nameFile= returnCursor.getString(nameIndex) //имя и расширение вместе
@@ -357,4 +372,4 @@ class MainActivitySend : AppCompatActivity() {
                     decoderResult = decoderFile.Decode(encoderResultFile, encoderResultFile.size)
                     val resultStrDecoderFile = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
                     var t3 = resultStrDecoderFile*/
-                } } } } }
+                } } } } } }}
