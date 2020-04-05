@@ -197,7 +197,7 @@ class MainActivitySend : AppCompatActivity() {
         if (size <= 1) predel = dataUsers.size * 8 //меньше одной посылки
        do {
             if (size <= 1) predel = dataUsers.size * 8 //меньше одной посылки
-            else predel = 110 *countIndex+outCircle // 110 бит
+            else predel = 109 *countIndex+outCircle // 110 бит
             for (n in (110 * outCircle)..(109 * countIndex+outCircle)) { //для одной посылки
                 if (n == 110 * outCircle) {
                     sendPackTemp[count] = true //старт бит
