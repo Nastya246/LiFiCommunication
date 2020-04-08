@@ -86,6 +86,8 @@
         android:buttonTint="#00FFC107"
         android:text="Прием данных"
         android:textAlignment="textStart"
+        android:checked="false"
+        android:onClick="onSwitchClicked"
         android:textOff="Выкл"
         android:textOn="Вкл"
         android:textSize="18sp"

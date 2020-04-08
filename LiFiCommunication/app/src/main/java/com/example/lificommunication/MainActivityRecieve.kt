@@ -6,6 +6,9 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Process.setThreadPriority
+import android.view.Gravity
+import android.view.View
+import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.FileInputStream
@@ -14,16 +17,12 @@ import java.util.*
 
 class MainActivityRecieve: AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_recieve)
-    }
-
     private var countPartFile: Int = 0 //для отсечения имени файла и формата от данных
     private var resultFileNameDecoder: String = "" //для хранения данных и записи в файл
     private var resultStrDecoder: String = "" //для хранения данных и записи в файл
 
     private var audioRunning = false //ключ для отслеживания окончания приема
+    private var flagRecieve = false //флаг для отслеживания готово ли устройство к приему
 
     private var userLogin = false //для проверки логина с передающего устройства
     private var userPassword = false //для проверки пароля с передающего устройства
@@ -31,7 +30,30 @@ class MainActivityRecieve: AppCompatActivity() {
     private var resultUnitNameDecoder: String = "" //для хранения имени устройства
     private var resultUnitPasswordDecoder: String = "" //для хранения пароля устройства
 
-    private fun stopAudio(audio: AudioRecord){
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main_recieve)
+    }
+
+    private fun onSwitchClicked(view: View){
+        findViewById<Switch>(R.id.switchRecieve)?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                flagRecieve = true
+                recieveData()
+            }
+            else {
+                flagRecieve = false
+                val showWarning = Toast.makeText(
+                    this,
+                    "Вы отключили режим приема",
+                    Toast.LENGTH_SHORT)
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
+            }
+        }
+    }
+
+    private fun stopAudio(audio: AudioRecord){ //функция для остановки записи
         try {
             try {
                 audio.stop() //останавливаем запись
@@ -47,9 +69,9 @@ class MainActivityRecieve: AppCompatActivity() {
     }
 
     private fun userConfirm(dataUsers: ByteArray, audioData: AudioRecord) {
-        val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
+        val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(0, dataUsers.size) //получаем данные в битах
 
-        if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
+        if(dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]){//проверка на окончание данных
             countUserInfo++
         }
 
@@ -102,24 +124,32 @@ class MainActivityRecieve: AppCompatActivity() {
                     userLogin = true
                     userPassword = true
                 } else { //если данные не совпали
-                    Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
+                    audioRunning = false
+                    Toast.makeText(
+                        this,
+                        "Данные не совпали, запросите их заново.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     stopAudio(audioData) //принудительная остановка приема, если данные не сопадают
                     return
                 }
             }
         } else { //если сумма не сошлась
-            Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
+            audioRunning = false
+            Toast.makeText(
+                this,
+                "Данные не совпали, запросите их заново.",
+                Toast.LENGTH_SHORT
+            ).show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
-
-        audioRunning = false
     }
 
     private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
 
-        if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
+        if(dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]){//проверка на окончание данных
             countPartFile++
         }
 
@@ -162,80 +192,126 @@ class MainActivityRecieve: AppCompatActivity() {
             }
 
             if(countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
+                audioRunning = false
                 applicationContext.openFileOutput(resultFileNameDecoder, Context.MODE_PRIVATE).use {
                     it.write(resultStrDecoder.toByteArray())
                 }
             }
         } else { //если сумма не сошлась
-            Toast.makeText(this, "Файл поврежден, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
+            audioRunning = false
+            Toast.makeText(
+                this,
+                "Файл поврежден, повторите попытку передачи.",
+                Toast.LENGTH_SHORT
+            ).show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
-
-        audioRunning = false
     }
 
-    suspend fun recieveData () {
-        setThreadPriority(-19) //приоритет для потока обработки аудио
-        audioRunning = true
-        var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
+    private fun recieveData () {
+        if(flagRecieve) {
+            setThreadPriority(-19) //приоритет для потока обработки аудио
+            audioRunning = true
+            var dataRecord: ByteArray =
+                byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
 
-        val minBufferSize = AudioRecord.getMinBufferSize(
-            44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
-            AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
-            AudioFormat.ENCODING_PCM_16BIT //формат входных данных, более известный как кодек
-        )
+            val minBufferSize = AudioRecord.getMinBufferSize(
+                44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
+                AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
+                AudioFormat.ENCODING_PCM_16BIT //формат входных данных, более известный как кодек
+            )
 
-        if(minBufferSize == AudioRecord.ERROR) {
-            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
-            System.err.println("getMinBufferSize returned ERROR")
-            return
-        }
-        if(minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
-            System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
-            return
-        }
-
-        val audioData: AudioRecord = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
-            AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
-            AudioFormat.ENCODING_PCM_16BIT, //формат входных данных, более известный как кодек
-            minBufferSize * 10 //размер самого внутреннего буфера
-        )
-
-        if(audioData.state != AudioRecord.STATE_INITIALIZED) {
-            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
-            System.err.println("getState() != STATE_INITIALIZED")
-            return
-        }
-
-        try {
-            audioData.startRecording() //начинаем запись
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-            return
-        }
-
-        while(audioRunning) {
-            var samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
-
-            if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
-                Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
-                System.err.println("read() returned ERROR_INVALID_OPERATION")
+            if (minBufferSize == AudioRecord.ERROR) {
+                Toast.makeText(
+                    this,
+                    "Что-то пошло не так, повторите попытку передачи.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                System.err.println("getMinBufferSize returned ERROR")
                 return
             }
-            if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
-                Toast.makeText(this, "Файл поврежден, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
-                System.err.println("read() returned ERROR_BAD_VALUE")
+            if (minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
+                Toast.makeText(
+                    this,
+                    "Что-то пошло не так, повторите попытку передачи.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
                 return
             }
 
-            if(userLogin && userPassword) fileCreate(dataRecord, audioData) //посылаем данные на обработку
-            else userConfirm(dataRecord, audioData)
-        }
+            val audioData: AudioRecord = AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
+                AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
+                AudioFormat.ENCODING_PCM_16BIT, //формат входных данных, более известный как кодек
+                minBufferSize * 10 //размер самого внутреннего буфера
+            )
 
-        stopAudio(audioData)
+            if (audioData.state != AudioRecord.STATE_INITIALIZED) {
+                Toast.makeText(
+                    this,
+                    "Что-то пошло не так, повторите попытку передачи.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                System.err.println("getState() != STATE_INITIALIZED")
+                return
+            }
+
+            try {
+                audioData.startRecording() //начинаем запись
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+                return
+            }
+
+            while (audioRunning) {
+                if (flagRecieve) {
+                    var samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
+
+                    if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                        Toast.makeText(
+                            this,
+                            "Что-то пошло не так, повторите попытку передачи.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        System.err.println("read() returned ERROR_INVALID_OPERATION")
+                        return
+                    }
+                    if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
+                        Toast.makeText(
+                            this,
+                            "Файл поврежден, повторите попытку передачи.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        System.err.println("read() returned ERROR_BAD_VALUE")
+                        return
+                    }
+
+                    if (userLogin && userPassword) fileCreate(
+                        dataRecord,
+                        audioData
+                    ) //посылаем данные на обработку
+                    else userConfirm(dataRecord, audioData)
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Прием остановлен пользователем, данные утеряны.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
+            }
+
+            stopAudio(audioData)
+        } else {
+            Toast.makeText(
+                this,
+                "Прием остановлен пользователем, данные утеряны.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
     }
 }
