@@ -34,6 +34,10 @@ class MainActivityRecieve: AppCompatActivity() {
     private fun userConfirm(dataUsers: ByteArray) {
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
 
+        if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
+            countUserInfo++
+        }
+
         var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
         var dataBitsCrc: BitSet = BitSet(16) //crc
         var count = 0 //для подсчета всех битов
@@ -62,7 +66,6 @@ class MainActivityRecieve: AppCompatActivity() {
                 val decoder: RC4 = RC4(keyForUnitPassword)
                 val decoderResult = decoder.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
                 resultUnitPasswordDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
-                countUserInfo++
             } else if (countUserInfo == 1) { //получение формата файла
                 val keyForUnitsFormat = "LightNameDevice".toByteArray() //это ключ для шифрования имени устройства
                 val decoderF: RC4 = RC4(keyForUnitsFormat)
@@ -70,21 +73,23 @@ class MainActivityRecieve: AppCompatActivity() {
                 resultUnitNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
             }
 
-            val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
-            val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
-            val inputBuffer = CharArray(22) //максимальный размер буфера
-            inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
-            val dataNamePassword = String(inputBuffer) //получили строку с данныими
-            var arrayDataNamePassword= dataNamePassword.split(',')
-            val password= arrayDataNamePassword[0] //ключ безопасности
-            val nameDevice= arrayDataNamePassword[1] //имя устройства
+            if(countUserInfo >= 2) {//когда прием данных авторизации закончен, осуществляется проверка их на соответствие
+                val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
+                val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
+                val inputBuffer = CharArray(22) //максимальный размер буфера
+                inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
+                val dataNamePassword = String(inputBuffer) //получили строку с данныими
+                var arrayDataNamePassword= dataNamePassword.split(',')
+                val password= arrayDataNamePassword[0] //ключ безопасности
+                val nameDevice= arrayDataNamePassword[1] //имя устройства
 
-            if(resultUnitNameDecoder === nameDevice && resultUnitPasswordDecoder === password) {
-                userLogin = true
-                userPassword = true
-            } else { //если данные не совпали
-                Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
-                return
+                if(resultUnitNameDecoder === nameDevice && resultUnitPasswordDecoder === password) {
+                    userLogin = true
+                    userPassword = true
+                } else { //если данные не совпали
+                    Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
+                    return
+                }
             }
         } else { //если сумма не сошлась
             Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
@@ -96,6 +101,10 @@ class MainActivityRecieve: AppCompatActivity() {
 
     private fun fileCreate(dataUsers: ByteArray) {
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
+
+        if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
+            countPartFile++
+        }
 
         var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
         var dataBitsCrc: BitSet = BitSet(16) //crc
@@ -123,22 +132,22 @@ class MainActivityRecieve: AppCompatActivity() {
                 val decoder: RC4 = RC4(keyForUnitsName)
                 val decoderResult = decoder.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
                 resultFileNameDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
-                countPartFile++
             } else if (countPartFile == 1) { //получение формата файла
                 val keyForUnitsFormat = "LightFormat".toByteArray() //это ключ для шифрования формата файла
                 val decoderF: RC4 = RC4(keyForUnitsFormat)
                 val decoderResult = decoderF.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
                 resultFileNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-                countPartFile++
             } else { //получение содержимого файла
                 val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
                 val decoderFile: RC4 = RC4(keyForUnitsFile)
                 val decoderResult = decoderFile.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
-                resultStrDecoder = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                resultStrDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
             }
 
-            applicationContext.openFileOutput(resultFileNameDecoder, Context.MODE_PRIVATE).use {
-                it.write(resultStrDecoder.toByteArray())
+            if(countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
+                applicationContext.openFileOutput(resultFileNameDecoder, Context.MODE_PRIVATE).use {
+                    it.write(resultStrDecoder.toByteArray())
+                }
             }
         } else { //если сумма не сошлась
             Toast.makeText(this, "Файл поврежден, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
