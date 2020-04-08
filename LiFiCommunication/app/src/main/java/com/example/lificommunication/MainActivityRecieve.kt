@@ -31,7 +31,22 @@ class MainActivityRecieve: AppCompatActivity() {
     private var resultUnitNameDecoder: String = "" //для хранения имени устройства
     private var resultUnitPasswordDecoder: String = "" //для хранения пароля устройства
 
-    private fun userConfirm(dataUsers: ByteArray) {
+    private fun stopAudio(audio: AudioRecord){
+        try {
+            try {
+                audio.stop() //останавливаем запись
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+                return
+            }
+        }
+
+        finally { //освобождаем ресурсы
+            audio.release()
+        }
+    }
+
+    private fun userConfirm(dataUsers: ByteArray, audioData: AudioRecord) {
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
 
         if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
@@ -88,18 +103,20 @@ class MainActivityRecieve: AppCompatActivity() {
                     userPassword = true
                 } else { //если данные не совпали
                     Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
+                    stopAudio(audioData) //принудительная остановка приема, если данные не сопадают
                     return
                 }
             }
         } else { //если сумма не сошлась
             Toast.makeText(this, "Данные не совпали, запросите их заново.", Toast.LENGTH_SHORT).show()
+            stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
 
         audioRunning = false
     }
 
-    private fun fileCreate(dataUsers: ByteArray) {
+    private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
 
         if(dataBitsUsers[0] === dataBitsUsers[1] === dataBitsUsers[2] === dataBitsUsers[4]){//проверка на окончание данных
@@ -151,6 +168,7 @@ class MainActivityRecieve: AppCompatActivity() {
             }
         } else { //если сумма не сошлась
             Toast.makeText(this, "Файл поврежден, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
+            stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
 
@@ -169,10 +187,12 @@ class MainActivityRecieve: AppCompatActivity() {
         )
 
         if(minBufferSize == AudioRecord.ERROR) {
+            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
             System.err.println("getMinBufferSize returned ERROR")
             return
         }
         if(minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
+            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
             System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
             return
         }
@@ -186,6 +206,7 @@ class MainActivityRecieve: AppCompatActivity() {
         )
 
         if(audioData.state != AudioRecord.STATE_INITIALIZED) {
+            Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
             System.err.println("getState() != STATE_INITIALIZED")
             return
         }
@@ -201,29 +222,20 @@ class MainActivityRecieve: AppCompatActivity() {
             var samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
 
             if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                Toast.makeText(this, "Что-то пошло не так, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
                 System.err.println("read() returned ERROR_INVALID_OPERATION")
                 return
             }
             if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
+                Toast.makeText(this, "Файл поврежден, повторите попытку передачи.", Toast.LENGTH_SHORT).show()
                 System.err.println("read() returned ERROR_BAD_VALUE")
                 return
             }
 
-            if(userLogin && userPassword) fileCreate(dataRecord) //посылаем данные на обработку
-            else userConfirm(dataRecord)
+            if(userLogin && userPassword) fileCreate(dataRecord, audioData) //посылаем данные на обработку
+            else userConfirm(dataRecord, audioData)
         }
 
-        try {
-            try {
-                audioData.stop() //останавливаем запись
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-                return
-            }
-        }
-
-        finally { //освобождаем ресурсы
-            audioData.release()
-        }
+        stopAudio(audioData)
     }
 }
