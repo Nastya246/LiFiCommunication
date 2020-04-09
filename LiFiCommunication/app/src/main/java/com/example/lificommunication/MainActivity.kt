@@ -12,23 +12,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
     //открыть экран для режима отправки
-    fun SendActivity (view: View) {
+    fun sendActivity (view: View) {
         val sendIntent = Intent(this, MainActivitySend::class.java)
         startActivity(sendIntent)
     }
     //открыть экран для режима приема
-    fun RecieveActivity (view: View) {
-        val recieveIntent = Intent(this, MainActivityRecieve::class.java)
-        startActivity(recieveIntent)
+    fun receiveActivity (view: View) {
+        val receiveIntent = Intent(this, MainActivityReceive::class.java)
+        startActivity(receiveIntent)
     }
-    fun SettingActivity (view: View) {
-        val SettingIntent = Intent(this, MainActivitySetting::class.java)
-        startActivity(SettingIntent)
+    fun settingActivity (view: View) {
+        val settingIntent = Intent(this, MainActivitySetting::class.java)
+        startActivity(settingIntent)
     }
     //открыть экран для спраки
-    fun SpravkaActivity (view: View) {
-        val SpravkaIntent = Intent(this, MainActivitySpravka::class.java)
-        startActivity(SpravkaIntent)
+    fun spravkaActivity (view: View) {
+        val spravkaIntent = Intent(this, MainActivitySpravka::class.java)
+        startActivity(spravkaIntent)
     }
 
 }

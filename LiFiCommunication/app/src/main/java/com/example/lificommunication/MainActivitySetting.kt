@@ -20,18 +20,18 @@ class MainActivitySetting : AppCompatActivity() {
         val inputStreamFileUser = InputStreamReader(fileInputDataUser) //
         val inputBuffer = CharArray(22)
         inputStreamFileUser.read(inputBuffer)
-        val dataNamePassw = String(inputBuffer) // получили строку с данныими
-        var ArrayDataNamePasw=dataNamePassw.split(',')
+        val dataNamePass = String(inputBuffer) // получили строку с данныими
+        var arrayDataNamePass=dataNamePass.split(',')
         setContentView(R.layout.activity_main_setting)
-        editTextNameDevice.text.append(ArrayDataNamePasw[1])
-        editTextPassword.text.append(ArrayDataNamePasw[0])
+        editTextNameDevice.text.append(arrayDataNamePass[1])
+        editTextPassword.text.append(arrayDataNamePass[0])
     }
     //открыть экран для режима приема
-    fun MainActivityActivity (view: View) {
-        val MainIntent = Intent(this, MainActivity::class.java)
-        startActivity(MainIntent)
+    fun mainActivityActivity (view: View) {
+        val mainIntent = Intent(this, MainActivity::class.java)
+        startActivity(mainIntent)
     }
-    fun SaveDeviceSettings(view: View) {
+    fun saveDeviceSettings(view: View) {
         //получение имени устройства
         val deviceName = editTextNameDevice.text.toString()
         if (deviceName.length > 10) {
@@ -91,6 +91,5 @@ class MainActivitySetting : AppCompatActivity() {
         showName.show()
         val showPass = Toast.makeText(this, devicePassword, Toast.LENGTH_SHORT)
         showPass.show()*/
-
     }
 }

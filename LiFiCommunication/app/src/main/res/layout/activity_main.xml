@@ -15,7 +15,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:background="@color/buttonBackground"
-        android:onClick="SpravkaActivity"
+        android:onClick="spravkaActivity"
         android:text="Справка"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,7 +28,7 @@
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
-        android:onClick="SettingActivity"
+        android:onClick="settingActivity"
         android:text="Параметры"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/spravka_button_menu"
@@ -36,12 +36,12 @@
         app:layout_constraintStart_toStartOf="@+id/spravka_button_menu" />
 
     <Button
-        android:id="@+id/button_recieve_menu"
+        android:id="@+id/button_receive_menu"
         android:layout_width="325dp"
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
-        android:onClick="RecieveActivity"
+        android:onClick="receiveActivity"
         android:text="Прием данных"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/parametry_button_menu"
@@ -55,13 +55,13 @@
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:background="@color/buttonBackground"
-        android:onClick="SendActivity"
+        android:onClick="sendActivity"
         android:text="Передача данных"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_recieve_menu"
-        app:layout_constraintEnd_toEndOf="@+id/button_recieve_menu"
+        app:layout_constraintBottom_toTopOf="@+id/button_receive_menu"
+        app:layout_constraintEnd_toEndOf="@+id/button_receive_menu"
         app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="@+id/button_recieve_menu" />
+        app:layout_constraintStart_toStartOf="@+id/button_receive_menu" />
 
     <ImageView
         android:id="@+id/imageView2"

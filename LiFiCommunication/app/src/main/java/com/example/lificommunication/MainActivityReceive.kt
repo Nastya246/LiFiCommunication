@@ -9,21 +9,22 @@ import android.os.Process.setThreadPriority
 import android.view.Gravity
 import android.view.View
 import android.widget.Switch
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main_recieve.*
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
 
-class MainActivityRecieve: AppCompatActivity() {
+class MainActivityReceive: AppCompatActivity() {
 
     private var countPartFile: Int = 0 //для отсечения имени файла и формата от данных
+    private var countFiles: Int = 0 //для подсчета количества файлов
     private var resultFileNameDecoder: String = "" //для хранения данных и записи в файл
     private var resultStrDecoder: String = "" //для хранения данных и записи в файл
 
     private var audioRunning = false //ключ для отслеживания окончания приема
-    private var flagRecieve = false //флаг для отслеживания готово ли устройство к приему
+    private var flagReceive = false //флаг для отслеживания готово ли устройство к приему
 
     private var userLogin = false //для проверки логина с передающего устройства
     private var userPassword = false //для проверки пароля с передающего устройства
@@ -37,13 +38,13 @@ class MainActivityRecieve: AppCompatActivity() {
     }
 
     private fun onSwitchClicked(view: View){
-        findViewById<Switch>(R.id.switchRecieve)?.setOnCheckedChangeListener { _, isChecked ->
+        findViewById<Switch>(R.id.switchReceive)?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                flagRecieve = true
+                flagReceive = true
                 recieveData()
             }
             else {
-                flagRecieve = false
+                flagReceive = false
                 val showWarning = Toast.makeText(
                     this,
                     "Вы отключили режим приема",
@@ -124,7 +125,7 @@ class MainActivityRecieve: AppCompatActivity() {
                     userLogin = true
                     userPassword = true
 
-                    findViewById<TextView>(R.id.nameDeviceConnectRecieve)?.text = resultUnitNameDecoder
+                    nameDeviceConnectReceive.text = resultUnitNameDecoder //отображение имени передающего устройства
                 } else { //если данные не совпали
                     audioRunning = false
                     Toast.makeText(
@@ -149,6 +150,16 @@ class MainActivityRecieve: AppCompatActivity() {
     }
 
     private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
+        if(countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
+            audioRunning = false
+            Toast.makeText(
+                this,
+                "Прием данных окончен.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
 
         if(dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]){//проверка на окончание данных
@@ -186,6 +197,8 @@ class MainActivityRecieve: AppCompatActivity() {
                 val decoderF: RC4 = RC4(keyForUnitsFormat)
                 val decoderResult = decoderF.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
                 resultFileNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                InfoReceiveFiles.append(resultFileNameDecoder) //отображение имени файла на экране
+                InfoReceiveFiles.append(System.getProperty("line.separator")) //перенос строки для следующего файла
             } else { //получение содержимого файла
                 val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
                 val decoderFile: RC4 = RC4(keyForUnitsFile)
@@ -194,10 +207,19 @@ class MainActivityRecieve: AppCompatActivity() {
             }
 
             if(countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
-                audioRunning = false
                 applicationContext.openFileOutput(resultFileNameDecoder, Context.MODE_PRIVATE).use {
                     it.write(resultStrDecoder.toByteArray())
                 }
+                countPartFile = 0
+                countFiles++
+            }
+            if(countFiles == 3) {//проверка что приняты все файлы
+                audioRunning = false
+                Toast.makeText(
+                    this,
+                    "Прием данных окончен.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } else { //если сумма не сошлась
             audioRunning = false
@@ -212,7 +234,7 @@ class MainActivityRecieve: AppCompatActivity() {
     }
 
     private fun recieveData () {
-        if(flagRecieve) {
+        if(flagReceive) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
             var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
@@ -268,8 +290,8 @@ class MainActivityRecieve: AppCompatActivity() {
             }
 
             while (audioRunning) {
-                if (flagRecieve) {
-                    var samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
+                if (flagReceive) {
+                    val samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
 
                     if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
                         Toast.makeText(
