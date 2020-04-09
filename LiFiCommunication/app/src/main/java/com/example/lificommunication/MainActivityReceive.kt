@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_recieve.*
+import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
@@ -38,20 +39,40 @@ class MainActivityReceive: AppCompatActivity() {
     }
 
     private fun onSwitchClicked(view: View){
-        findViewById<Switch>(R.id.switchReceive)?.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                flagReceive = true
-                recieveData()
-            }
-            else {
-                flagReceive = false
-                val showWarning = Toast.makeText(
+        val file = File("dataUser.txt")
+
+        if(file.exists()) { //проверка существует ли файл с логином и паролем
+            if(file.length().toInt() != 0) { //проверка, что файл может быть пустым
+                findViewById<Switch>(R.id.switchReceive)?.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        flagReceive = true
+                        recieveData()
+                    } else {
+                        flagReceive = false
+                        val showWarning = Toast.makeText(
+                            this,
+                            "Вы отключили режим приема.",
+                            Toast.LENGTH_SHORT
+                        )
+                        showWarning.setGravity(Gravity.CENTER, 0, 0)
+                        showWarning.show()
+                    }
+                }
+            } else {
+                Toast.makeText(
                     this,
-                    "Вы отключили режим приема",
-                    Toast.LENGTH_SHORT)
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
-                showWarning.show()
+                    "Что-то пошло не так, укажите логин и пароль для устройства.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
             }
+        } else {
+            Toast.makeText(
+                this,
+                "Необходимо указать логин и пароль для устройства.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
         }
     }
 
