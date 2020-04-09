@@ -96,7 +96,6 @@ class MainActivityRecieve: AppCompatActivity() {
                 if ((count % 2 == 0)) fullPackage[countBits++] =
                     dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
             }
-
             //схема дешифрования
             if (countUserInfo == 0) { //получение имени файла
                 val keyForUnitPassword = "LightNamePassw".toByteArray() //это ключ для шифрования пароля устройства
@@ -120,7 +119,7 @@ class MainActivityRecieve: AppCompatActivity() {
                 val password= arrayDataNamePassword[0] //ключ безопасности
                 val nameDevice= arrayDataNamePassword[1] //имя устройства
 
-                if(resultUnitNameDecoder === nameDevice && resultUnitPasswordDecoder === password) {
+                if(resultUnitPasswordDecoder === password) {
                     userLogin = true
                     userPassword = true
                 } else { //если данные не совпали
@@ -213,8 +212,7 @@ class MainActivityRecieve: AppCompatActivity() {
         if(flagRecieve) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
-            var dataRecord: ByteArray =
-                byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
+            var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
 
             val minBufferSize = AudioRecord.getMinBufferSize(
                 44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
@@ -300,6 +298,7 @@ class MainActivityRecieve: AppCompatActivity() {
                         "Прием остановлен пользователем, данные утеряны.",
                         Toast.LENGTH_SHORT
                     ).show()
+                    stopAudio(audioData)
                     return
                 }
             }
@@ -308,7 +307,7 @@ class MainActivityRecieve: AppCompatActivity() {
         } else {
             Toast.makeText(
                 this,
-                "Прием остановлен пользователем, данные утеряны.",
+                "Прием данных отключен.",
                 Toast.LENGTH_SHORT
             ).show()
             return
