@@ -9,6 +9,7 @@ import android.os.Process.setThreadPriority
 import android.view.Gravity
 import android.view.View
 import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.FileInputStream
@@ -122,6 +123,8 @@ class MainActivityRecieve: AppCompatActivity() {
                 if(resultUnitPasswordDecoder === password) {
                     userLogin = true
                     userPassword = true
+
+                    findViewById<TextView>(R.id.nameDeviceConnectRecieve)?.text = resultUnitNameDecoder
                 } else { //если данные не совпали
                     audioRunning = false
                     Toast.makeText(

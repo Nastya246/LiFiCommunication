@@ -8,7 +8,7 @@
     tools:context=".MainActivityRecieve">
 
     <TextView
-        android:id="@+id/infoLabelRecive"
+        android:id="@+id/infoLabelReceive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -106,7 +106,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/infoLabelRecive">
+        app:layout_constraintTop_toBottomOf="@+id/infoLabelReceive">
 
         <LinearLayout
             android:layout_width="match_parent"
