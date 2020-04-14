@@ -14,7 +14,7 @@
         android:layout_width="322dp"
         android:layout_height="43dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="64dp"
         android:buttonTint="#00FFC107"
         android:checked="true"
@@ -47,7 +47,7 @@
         android:layout_width="385dp"
         android:layout_height="1dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="64dp"
         android:background="@color/Divider"
         app:layout_constraintEnd_toEndOf="parent"
@@ -60,29 +60,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Коммуникация с устройством"
+        android:text="Коммуникация "
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@+id/switchSend"
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
-    <CheckBox
-        android:id="@+id/nameDeviceConnectSend"
-        android:layout_width="332dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="16dp"
-        android:text="Имя устройства"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="@+id/InfoAboutCommunication"
-        app:layout_constraintTop_toBottomOf="@+id/InfoAboutCommunication"
-        tools:visibility="invisible" />
-
     <TextView
         android:id="@+id/InfoAboutCommunication"
         android:layout_width="335dp"
         android:layout_height="43dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="3dp"
         android:text="Нажмите на имя устройства, чтобы получить детальную информацию"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
         app:layout_constraintTop_toBottomOf="@+id/LabelCommunication" />
 
@@ -90,53 +80,26 @@
         android:id="@+id/InfoLabelSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:text="Отправка"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="@+id/nameDeviceConnectSend"
         app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
-    <Button
-        android:id="@+id/button_AddFile"
-        android:layout_width="325dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/buttonBackground"
-        android:onClick="addFile"
-        android:text="Добавить файлы"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button_Send"
-        android:layout_width="325dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="32dp"
-        android:background="@color/buttonBackground"
-        android:onClick="sendData"
-        android:text="Отправить"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_AddFile"
-        app:layout_constraintEnd_toEndOf="@+id/button_AddFile"
-        app:layout_constraintStart_toStartOf="@+id/button_AddFile" />
-
     <ScrollView
         android:id="@+id/ScrollSend"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="1dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@+id/button_Send"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/InfoLabelSend"
-        app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toBottomOf="@+id/InfoLabelSend">
 
         <TextView
             android:id="@+id/InfoAddFiles"
@@ -151,5 +114,103 @@
             app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
             app:layout_constraintTop_toBottomOf="@+id/LabelCommunication" />
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="15dp"
+        android:background="@color/buttonBackground"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/buttonAddFile"
+            android:layout_width="136dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="addFile"
+            app:srcCompat="@drawable/ic_add_black_48dp" />
+
+        <ImageButton
+            android:id="@+id/buttonSend"
+            android:layout_width="136dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="sendData"
+            app:srcCompat="@drawable/ic_publish_black_48dp" />
+
+        <ImageButton
+            android:id="@+id/buttonCancel"
+            android:layout_width="136dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="sendMain"
+            app:srcCompat="@drawable/ic_home_black_24dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/nameDeviceConnectSend"
+        android:layout_width="326dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/divider2"
+        app:layout_constraintStart_toStartOf="@+id/InfoAboutCommunication"
+        app:layout_constraintTop_toBottomOf="@+id/InfoAboutCommunication" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="@color/buttonBackground"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/addFileTxt"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="addFile"
+            android:text="Добавить файл"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/sendFileText"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="sendData"
+            android:text="Отправить"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/MenuText"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="sendMain"
+            android:text="В меню"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

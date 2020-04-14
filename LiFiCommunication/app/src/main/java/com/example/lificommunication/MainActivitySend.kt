@@ -12,11 +12,14 @@ import android.media.AudioTrack
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main_recieve.*
 import kotlinx.android.synthetic.main.activity_main_send.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -99,7 +102,8 @@ class MainActivitySend : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_send)
-        InfoAddFiles.setTextColor(Color.BLACK)
+        InfoAddFiles.setTextColor(Color.GRAY)
+        InfoAddFiles.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f)
         val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
         val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
         val inputBuffer = CharArray(22) //максимальный размер буфера
@@ -108,7 +112,9 @@ class MainActivitySend : AppCompatActivity() {
         var arrayDataNamePasw= dataNamePassw.split(',')
         val passw= arrayDataNamePasw[0].toByteArray() //ключ безопасности
         val nameDevice= arrayDataNamePasw[1].toByteArray() //имя устройства
-
+        nameDeviceConnectSend.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
+        nameDeviceConnectSend.setTextColor(Color.BLUE)
+        nameDeviceConnectSend.setText(arrayDataNamePasw[1])
         val keyForPassw = "LightNamePassw".toByteArray() //это ключ для шифрования ключа пароля безопасности
         val encoderKeyPassw: RC4 = RC4(keyForPassw)
         val encoderResultPassw= encoderKeyPassw.encode(passw, passw.size) //шифрование пароля безопасности
@@ -122,6 +128,17 @@ class MainActivitySend : AppCompatActivity() {
             packageCreate(encoderResultNameDevice) //для имени устройства
             splitPackage()
         }
+        val nameDeviceText = findViewById<TextView>(R.id.nameDeviceConnectSend) //вывод данных по нажатию на утсройство
+        if (nameDeviceText != null) {
+           nameDeviceText.setOnClickListener {
+                    val showWarning = Toast.makeText(
+                        this,
+                        "Ваш ключ - "+ arrayDataNamePasw[0],
+                        Toast.LENGTH_LONG
+                    )
+                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.show()
+                 } }
         val switchSend = findViewById<Switch>(R.id.switchSend) //проверка переключателя switch
         if (switchSend != null) {
             switchSend.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -336,8 +353,7 @@ class MainActivitySend : AppCompatActivity() {
                 ListArraySend.add(pasw)
                 splitPackage()
                 ListArraySend.add(name)
-                splitPackage()
-            }
+                splitPackage() }
             }
             var selectedFile = data?.data //The uri with the location of the file
             var matchResult = Regex("""([^%2F]*)$""").find(selectedFile.toString())
@@ -380,6 +396,7 @@ class MainActivitySend : AppCompatActivity() {
                     val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
                     val encoderFile: RC4 = RC4(keyForUnitsFile)
                     val encoderResultFile= encoderFile.encode(fileUser, fileUser.size) //шифрование файла
+                    InfoAddFiles.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
                     var arrayText = InfoAddFiles.text.split("...")
                     InfoAddFiles.setTextColor(Color.BLUE)
                     InfoAddFiles.setText(arrayText[0].trimEnd()+" ... Пожалуйста, подождите")
@@ -395,7 +412,7 @@ class MainActivitySend : AppCompatActivity() {
                     GlobalScope.launch() {
                         while(!flagComplete){}
                         withContext(Dispatchers.Main) {
-                            InfoAddFiles.setTextColor(Color.BLACK)
+                            InfoAddFiles.setTextColor(Color.GRAY)
                             InfoAddFiles.setText(arrayText[0])
                         } }
                     /*схема дешифрования:
@@ -412,4 +429,10 @@ class MainActivitySend : AppCompatActivity() {
                     decoderResult = decoderFile.Decode(encoderResultFile, encoderResultFile.size)
                     val resultStrDecoderFile = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
                     var t3 = resultStrDecoderFile*/
-                } } } } } }}
+                } } } } } }
+
+    fun sendMain (view: View) {
+        val sendMain = Intent(this, MainActivity::class.java)
+        startActivity(sendMain)
+    }
+}

@@ -7,89 +7,127 @@
     android:background="@color/layotBackground"
     tools:context=".MainActivitySetting">
 
-    <Button
-        android:id="@+id/button_SaveSetting"
-        android:layout_width="325dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/buttonBackground"
-        android:onClick="SaveDeviceSettings"
-        android:text="Сохранить"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_CancelSetting"
-        app:layout_constraintEnd_toEndOf="@+id/button_CancelSetting"
-        app:layout_constraintStart_toStartOf="@+id/button_CancelSetting" />
-
-    <Button
-        android:id="@+id/button_CancelSetting"
-        android:layout_width="325dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:background="@color/buttonBackground"
-        android:onClick="MainActivityActivity"
-        android:text="В меню"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/textViewSetting"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginBottom="64dp"
         android:text="Настройка"
         android:textColor="@android:color/black"
         android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/textViewNameDevice"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editTextNameDevice"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginBottom="18dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewSetting" />
+        app:layout_constraintBottom_toTopOf="@+id/textViewPass"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/editTextPassword"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="45dp"
+        android:layout_marginBottom="250dp"
         android:ems="10"
         android:inputType="textPassword"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewPass" />
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textViewPass"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="45dp"
-        android:layout_marginTop="16dp"
         android:text="Введите пароль"
         android:textColor="@android:color/background_dark"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextNameDevice" />
+        app:layout_constraintBottom_toTopOf="@+id/editTextPassword"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textViewNameDevice"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="45dp"
         android:text="Введите имя устройства"
         android:textColor="@android:color/background_dark"
         app:layout_constraintBottom_toTopOf="@+id/editTextNameDevice"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewSetting"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="15dp"
+        android:background="@color/buttonBackground"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/buttonSaveSetting"
+            android:layout_width="204dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="SaveDeviceSettings"
+            app:srcCompat="@drawable/ic_save_black_48dp" />
+
+        <ImageButton
+            android:id="@+id/buttonCancel"
+            android:layout_width="204dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="MainActivityActivity"
+            app:srcCompat="@drawable/ic_home_black_24dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="@color/buttonBackground"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/addFileTxt2"
+            android:layout_width="204dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="SaveDeviceSettings"
+            android:text="Сохранить"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/menuText"
+            android:layout_width="204dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="MainActivityActivity"
+            android:text="В меню"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
