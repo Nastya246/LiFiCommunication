@@ -30,13 +30,10 @@
         android:layout_marginEnd="1dp"
         android:layout_marginBottom="15dp"
         android:background="@color/buttonBackground"
-
         android:orientation="horizontal"
-
         android:onClick="spravkaActivity"
         android:text="Справка"
         android:textSize="16sp"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -58,7 +55,6 @@
             android:background="@color/buttonBackground"
             android:onClick="receiveActivity"
             app:srcCompat="@drawable/ic_file_download_black_48dp" />
-
 
         <ImageButton
             android:id="@+id/parametryButtonMenu"
@@ -85,16 +81,10 @@
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
         android:background="@color/buttonBackground"
-
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
-       <!--> android:onClick="sendActivity"
-        android:text="Передача данных"
-        android:textSize="16sp"
-       <!-->
 
         <TextView
             android:id="@+id/textView2"

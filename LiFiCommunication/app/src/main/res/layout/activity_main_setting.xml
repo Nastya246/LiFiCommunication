@@ -7,7 +7,6 @@
     android:background="@color/layotBackground"
     tools:context=".MainActivitySetting">
 
-
     <TextView
         android:id="@+id/textViewSetting"
         android:layout_width="0dp"
@@ -93,7 +92,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="@color/buttonBackground"
-            android:onClick="mainActivityActivity"
+            android:onClick="mainActivity"
             app:srcCompat="@drawable/ic_home_black_24dp" />
     </LinearLayout>
 
@@ -125,7 +124,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.9"
             android:background="@color/buttonBackground"
-            android:onClick="mainActivityActivity"
+            android:onClick="mainActivity"
             android:text="В меню"
             android:textAlignment="center"
             android:textSize="12sp" />

@@ -1,6 +1,7 @@
 package com.example.lificommunication
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -36,6 +37,11 @@ class MainActivityReceive: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
+    }
+
+    fun mainActivity (view: View) {
+        val mainIntent = Intent(this, MainActivity::class.java)
+        startActivity(mainIntent)
     }
 
     private fun onSwitchClicked(view: View){
