@@ -37,49 +37,52 @@ class MainActivityReceive: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
+
+        val file = File("dataUser.txt")
+        var switch: Switch = findViewById<Switch>(R.id.switchReceive)
+
+        if (switch != null) {
+            if (file.exists()) { //проверка существует ли файл с логином и паролем
+                if (file.length().toInt() != 0) { //проверка, что файл может быть пустым
+                    switch.setEnabled(true)
+                    flagReceive = true
+                    recieveData()
+                } else {
+                    switch.setEnabled(false)
+                    val showWarning = Toast.makeText(
+                        this,
+                        "Что-то пошло не так, укажите логин и пароль для устройства.",
+                        Toast.LENGTH_SHORT
+                    )
+                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.show()
+                }
+            } else {
+                switch.setEnabled(false)
+                val showWarning = Toast.makeText(
+                    this,
+                    "Необходимо указать логин и пароль для устройства.",
+                    Toast.LENGTH_SHORT
+                )
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
+            }
+        } else {
+            switch.setEnabled(false)
+            flagReceive = false
+            val showWarning = Toast.makeText(
+                this,
+                "Вы отключили режим приема.",
+                Toast.LENGTH_SHORT
+            )
+            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.show()
+        }
     }
 
     fun mainWindowOpen(view: View) {
         val mainIntent = Intent(this, MainActivity::class.java)
         startActivity(mainIntent)
-    }
-
-    private fun onSwitchClicked(view: View){
-        val file = File("dataUser.txt")
-
-        if(file.exists()) { //проверка существует ли файл с логином и паролем
-            if(file.length().toInt() != 0) { //проверка, что файл может быть пустым
-                findViewById<Switch>(R.id.switchReceive)?.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        flagReceive = true
-                        recieveData()
-                    } else {
-                        flagReceive = false
-                        val showWarning = Toast.makeText(
-                            this,
-                            "Вы отключили режим приема.",
-                            Toast.LENGTH_SHORT
-                        )
-                        showWarning.setGravity(Gravity.CENTER, 0, 0)
-                        showWarning.show()
-                    }
-                }
-            } else {
-                Toast.makeText(
-                    this,
-                    "Что-то пошло не так, укажите логин и пароль для устройства.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return
-            }
-        } else {
-            Toast.makeText(
-                this,
-                "Необходимо указать логин и пароль для устройства.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
     }
 
     private fun stopAudio(audio: AudioRecord){ //функция для остановки записи
@@ -155,22 +158,26 @@ class MainActivityReceive: AppCompatActivity() {
                     nameDeviceConnectReceive.text = resultUnitNameDecoder //отображение имени передающего устройства
                 } else { //если данные не совпали
                     audioRunning = false
-                    Toast.makeText(
+                    val showWarning = Toast.makeText(
                         this,
                         "Данные не совпали, запросите их заново.",
                         Toast.LENGTH_SHORT
-                    ).show()
+                    )
+                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.show()
                     stopAudio(audioData) //принудительная остановка приема, если данные не сопадают
                     return
                 }
             }
         } else { //если сумма не сошлась
             audioRunning = false
-            Toast.makeText(
+            val showWarning = Toast.makeText(
                 this,
                 "Данные не совпали, запросите их заново.",
                 Toast.LENGTH_SHORT
-            ).show()
+            )
+            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
@@ -179,11 +186,13 @@ class MainActivityReceive: AppCompatActivity() {
     private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
         if(countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
             audioRunning = false
-            Toast.makeText(
+            val showWarning = Toast.makeText(
                 this,
                 "Прием данных окончен.",
                 Toast.LENGTH_SHORT
-            ).show()
+            )
+            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.show()
             return
         }
 
@@ -242,19 +251,23 @@ class MainActivityReceive: AppCompatActivity() {
             }
             if(countFiles == 3) {//проверка что приняты все файлы
                 audioRunning = false
-                Toast.makeText(
+                val showWarning = Toast.makeText(
                     this,
                     "Прием данных окончен.",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
             }
         } else { //если сумма не сошлась
             audioRunning = false
-            Toast.makeText(
+            val showWarning = Toast.makeText(
                 this,
                 "Файл поврежден, повторите попытку передачи.",
                 Toast.LENGTH_SHORT
-            ).show()
+            )
+            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
@@ -273,20 +286,24 @@ class MainActivityReceive: AppCompatActivity() {
             )
 
             if (minBufferSize == AudioRecord.ERROR) {
-                Toast.makeText(
+                val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
                 System.err.println("getMinBufferSize returned ERROR")
                 return
             }
             if (minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
-                Toast.makeText(
+                val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
                 System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
                 return
             }
@@ -300,11 +317,13 @@ class MainActivityReceive: AppCompatActivity() {
             )
 
             if (audioData.state != AudioRecord.STATE_INITIALIZED) {
-                Toast.makeText(
+                val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
+                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.show()
                 System.err.println("getState() != STATE_INITIALIZED")
                 return
             }
@@ -321,20 +340,24 @@ class MainActivityReceive: AppCompatActivity() {
                     val samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
 
                     if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
-                        Toast.makeText(
+                        val showWarning = Toast.makeText(
                             this,
                             "Что-то пошло не так, повторите попытку передачи.",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        )
+                        showWarning.setGravity(Gravity.CENTER, 0, 0)
+                        showWarning.show()
                         System.err.println("read() returned ERROR_INVALID_OPERATION")
                         return
                     }
                     if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
-                        Toast.makeText(
+                        val showWarning = Toast.makeText(
                             this,
                             "Файл поврежден, повторите попытку передачи.",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        )
+                        showWarning.setGravity(Gravity.CENTER, 0, 0)
+                        showWarning.show()
                         System.err.println("read() returned ERROR_BAD_VALUE")
                         return
                     }
@@ -345,11 +368,13 @@ class MainActivityReceive: AppCompatActivity() {
                     ) //посылаем данные на обработку
                     else userConfirm(dataRecord, audioData)
                 } else {
-                    Toast.makeText(
+                    val showWarning = Toast.makeText(
                         this,
                         "Прием остановлен пользователем, данные утеряны.",
                         Toast.LENGTH_SHORT
-                    ).show()
+                    )
+                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.show()
                     stopAudio(audioData)
                     return
                 }
@@ -357,11 +382,13 @@ class MainActivityReceive: AppCompatActivity() {
 
             stopAudio(audioData)
         } else {
-            Toast.makeText(
+            val showWarning = Toast.makeText(
                 this,
                 "Прием данных отключен.",
                 Toast.LENGTH_SHORT
-            ).show()
+            )
+            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.show()
             return
         }
     }
