@@ -12,7 +12,7 @@ class MainActivitySpravka : AppCompatActivity() {
         setContentView(R.layout.activity_main_spravka)
     }
     //открыть экран для режима отправки
-    fun SendMain (view: View) {
+    fun sendMain (view: View) {
         val sendMain = Intent(this, MainActivity::class.java)
         startActivity(sendMain)
     }

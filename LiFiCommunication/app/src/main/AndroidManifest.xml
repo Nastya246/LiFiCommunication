@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivitySpravka"></activity>
         <activity android:name=".MainActivitySetting" />
-        <activity android:name=".MainActivityRecieve" />
+        <activity android:name=".MainActivityReceive" />
         <activity android:name=".MainActivitySend" />
         <activity android:name=".MainActivity">
             <intent-filter>

@@ -7,6 +7,7 @@
     android:background="@color/layotBackground"
     tools:context=".MainActivitySetting">
 
+
     <TextView
         android:id="@+id/textViewSetting"
         android:layout_width="0dp"
@@ -83,7 +84,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="@color/buttonBackground"
-            android:onClick="SaveDeviceSettings"
+            android:onClick="saveDeviceSettings"
             app:srcCompat="@drawable/ic_save_black_48dp" />
 
         <ImageButton
@@ -92,7 +93,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="@color/buttonBackground"
-            android:onClick="MainActivityActivity"
+            android:onClick="mainActivityActivity"
             app:srcCompat="@drawable/ic_home_black_24dp" />
     </LinearLayout>
 
@@ -113,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.9"
             android:background="@color/buttonBackground"
-            android:onClick="SaveDeviceSettings"
+            android:onClick="saveDeviceSettings"
             android:text="Сохранить"
             android:textAlignment="center"
             android:textSize="12sp" />
@@ -124,7 +125,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.9"
             android:background="@color/buttonBackground"
-            android:onClick="MainActivityActivity"
+            android:onClick="mainActivityActivity"
             android:text="В меню"
             android:textAlignment="center"
             android:textSize="12sp" />

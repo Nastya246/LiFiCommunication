@@ -51,7 +51,7 @@
             android:layout_height="60dp"
             android:layout_weight="1"
             android:background="@color/buttonBackground"
-            android:onClick="SendMain"
+            android:onClick="sendMain"
             app:srcCompat="@drawable/ic_done_black_48dp" />
     </LinearLayout>
 
