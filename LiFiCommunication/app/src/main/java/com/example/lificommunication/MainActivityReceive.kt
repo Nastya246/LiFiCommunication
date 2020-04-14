@@ -39,7 +39,7 @@ class MainActivityReceive: AppCompatActivity() {
         setContentView(R.layout.activity_main_recieve)
     }
 
-    fun mainActivity (view: View) {
+    fun mainWindowOpen(view: View) {
         val mainIntent = Intent(this, MainActivity::class.java)
         startActivity(mainIntent)
     }

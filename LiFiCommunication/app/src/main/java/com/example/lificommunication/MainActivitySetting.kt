@@ -27,7 +27,7 @@ class MainActivitySetting : AppCompatActivity() {
         editTextPassword.text.append(arrayDataNamePass[0])
     }
     //открыть экран для режима приема
-    fun mainActivity (view: View) {
+    fun mainWindowActivity (view: View) {
         val mainIntent = Intent(this, MainActivity::class.java)
         startActivity(mainIntent)
     }
