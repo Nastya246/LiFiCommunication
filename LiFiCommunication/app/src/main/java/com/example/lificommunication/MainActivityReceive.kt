@@ -329,12 +329,11 @@ class MainActivityReceive: AppCompatActivity() {
         }
     }
 
-    private fun receiveData () {
+    private suspend fun receiveData () {
         if(flagReceive) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
             var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
-            var samplesRead: Int = 0
 
             val minBufferSize = AudioRecord.getMinBufferSize(
                 44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
@@ -406,13 +405,11 @@ class MainActivityReceive: AppCompatActivity() {
 
             while (audioRunning) {
                 if (flagReceive) {
-                    GlobalScope.launch {
-                        samplesRead = audioData.read( //считывание данных
-                            dataRecord,
-                            0,
-                            32
-                        )
-                    }
+                    var samplesRead: Int = audioData.read( //считывание данных
+                        dataRecord,
+                        0,
+                        32
+                    )
 
                     if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
                         val showWarning = Toast.makeText(
