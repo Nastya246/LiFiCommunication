@@ -45,7 +45,7 @@ class MainActivityReceive: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
 
-        val file = File("dataUser.txt")
+        val file = File("/data/data/LiFicommunication/files/dataUser.txt")
         switch = findViewById<Switch>(R.id.switchReceive)
         val textView = findViewById<TextView>(R.id.nameDeviceConnectReceive) //вывод данных по нажатию на утсройство
 
