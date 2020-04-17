@@ -41,7 +41,7 @@ class MainActivityReceive: AppCompatActivity() {
         setContentView(R.layout.activity_main_recieve)
 
         val file = File("dataUser.txt")
-        var switch: Switch = findViewById<Switch>(R.id.switchReceive)
+        val switch: Switch = findViewById<Switch>(R.id.switchReceive)
 
         if (switch != null) {
             if (file.exists()) { //проверка существует ли файл с логином и паролем
@@ -53,6 +53,7 @@ class MainActivityReceive: AppCompatActivity() {
                     }
                 } else {
                     switch.setEnabled(false)
+                    flagReceive = false
                     val showWarning = Toast.makeText(
                         this,
                         "Что-то пошло не так, укажите логин и пароль для устройства.",
@@ -67,6 +68,7 @@ class MainActivityReceive: AppCompatActivity() {
                 }
             } else {
                 switch.setEnabled(false)
+                flagReceive = false
                 val showWarning = Toast.makeText(
                     this,
                     "Необходимо указать логин и пароль для устройства.",
@@ -104,104 +106,109 @@ class MainActivityReceive: AppCompatActivity() {
         startActivity(mainIntent)
     }
 
-    private fun stopAudio(audio: AudioRecord){ //функция для остановки записи
-        try {
-            try {
-                audio.stop() //останавливаем запись
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
+    private fun userConfirm(dataUsers: ByteArray, audioData: AudioRecord) {
+        if (flagReceive) {
+            val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(
+                0,
+                dataUsers.size
+            ) //получаем данные в битах
+
+            if (dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]) {//проверка на окончание данных
+                countUserInfo++
+                if (countUserInfo >= 2) { //когда прием данных авторизации закончен, осуществляется проверка их на соответствие
+                    val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
+                    val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
+                    val inputBuffer = CharArray(22) //максимальный размер буфера
+                    inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
+                    val dataNamePassword = String(inputBuffer) //получили строку с данныими
+                    var arrayDataNamePassword = dataNamePassword.split(',')
+                    val password = arrayDataNamePassword[0] //ключ безопасности
+                    val nameDevice = arrayDataNamePassword[1] //имя устройства
+                    countUserInfo=0
+
+                    if (resultUnitPasswordDecoder === password) {
+                        userLogin = true
+                        userPassword = true
+
+                        nameDeviceConnectReceive.text = resultUnitNameDecoder //отображение имени передающего устройства
+                    } else { //если данные не совпали
+                        audioRunning = false
+                        val showWarning = Toast.makeText(
+                            this,
+                            "Данные не совпали, запросите их заново.",
+                            Toast.LENGTH_SHORT
+                        )
+                        showWarning.setGravity(
+                            Gravity.CENTER,
+                            0,
+                            0
+                        )
+                        showWarning.show()
+                        return
+                    }
+                }
+
                 return
             }
-        }
 
-        finally { //освобождаем ресурсы
-            audio.release()
-        }
-    }
+            var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
+            var dataBitsCrc: BitSet = BitSet(16) //crc
+            var count = 0 //для подсчета всех битов
+            var countCrc = 0 //для подсчета битов у crc
+            var countBits = 0 //для подсчета битов данных
 
-    private fun userConfirm(dataUsers: ByteArray, audioData: AudioRecord) {
-        val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(0, dataUsers.size) //получаем данные в битах
-
-        if(dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]){//проверка на окончание данных
-            countUserInfo++
-        }
-
-        var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
-        var dataBitsCrc: BitSet = BitSet(16) //crc
-        var count = 0 //для подсчета всех битов
-        var countCrc = 0 //для подсчета битов у crc
-        var countBits = 0 //для подсчета битов данных
-
-        while(count < 256) {
-            if((count < 222) || (count in 254..255))  dataBitsWithoutCrc[countBits++] = dataBitsUsers[count++] //получаем самму посылку без crc
-            else if ((count in 222..253) && (count % 2 == 0)) dataBitsCrc[countCrc++] = dataBitsUsers[count++] //получаем crc бещ доп битов
-        }
-
-        val crcForPack = crcPack(dataBitsWithoutCrc) //получили crc
-        var fullPackage: BitSet = BitSet(108) //для хранения только данных из файла
-        count = 2
-        countBits = 0
-
-        if(dataBitsCrc === crcForPack) { //проверяем совпадают ли суммы
-            while (count < 222) { //получаем посылку без доп бит
-                if ((count % 2 == 0)) fullPackage[countBits++] = dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
-            }
-            //схема дешифрования
-            if (countUserInfo == 0) { //получение имени файла
-                val keyForUnitPassword = "LightNamePassw".toByteArray() //это ключ для шифрования пароля устройства
-                val decoder: RC4 = RC4(keyForUnitPassword)
-                val decoderResult = decoder.decode(
-                    fullPackage.toByteArray(),
-                    fullPackage.toByteArray().size
-                )
-                resultUnitPasswordDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
-            } else if (countUserInfo == 1) { //получение формата файла
-                val keyForUnitsFormat = "LightNameDevice".toByteArray() //это ключ для шифрования имени устройства
-                val decoderF: RC4 = RC4(keyForUnitsFormat)
-                val decoderResult = decoderF.decode(
-                    fullPackage.toByteArray(),
-                    fullPackage.toByteArray().size
-                )
-                resultUnitNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+            while (count < 256) {
+                if ((count < 222) || (count in 254..255)) dataBitsWithoutCrc[countBits++] = dataBitsUsers[count++] //получаем самму посылку без crc
+                else if ((count in 222..253) && (count % 2 == 0)) dataBitsCrc[countCrc++] = dataBitsUsers[count++] //получаем crc бещ доп битов
             }
 
-            if(countUserInfo >= 2) {//когда прием данных авторизации закончен, осуществляется проверка их на соответствие
-                val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
-                val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
-                val inputBuffer = CharArray(22) //максимальный размер буфера
-                inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
-                val dataNamePassword = String(inputBuffer) //получили строку с данныими
-                var arrayDataNamePassword= dataNamePassword.split(',')
-                val password= arrayDataNamePassword[0] //ключ безопасности
-                val nameDevice= arrayDataNamePassword[1] //имя устройства
+            val crcForPack = crcPack(dataBitsWithoutCrc) //получили crc
+            var fullPackage: BitSet = BitSet(108) //для хранения только данных из файла
+            count = 2
+            countBits = 0
 
-                if(resultUnitPasswordDecoder === password) {
-                    userLogin = true
-                    userPassword = true
-
-                    nameDeviceConnectReceive.text = resultUnitNameDecoder //отображение имени передающего устройства
-                } else { //если данные не совпали
-                    audioRunning = false
-                    val showWarning = Toast.makeText(
-                        this,
-                        "Данные не совпали, запросите их заново.",
-                        Toast.LENGTH_SHORT
-                    )
-                    showWarning.setGravity(
-                        Gravity.CENTER,
-                        0,
-                        0
-                    )
-                    showWarning.show()
-                    stopAudio(audioData) //принудительная остановка приема, если данные не сопадают
-                    return
+            if (dataBitsCrc === crcForPack) { //проверяем совпадают ли суммы
+                while (count < 222) { //получаем посылку без доп бит
+                    if ((count % 2 == 0)) fullPackage[countBits++] = dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
                 }
+                //схема дешифрования
+                if (countUserInfo == 0) { //получение имени файла
+                    val keyForUnitPassword = "LightNamePassw".toByteArray() //это ключ для шифрования пароля устройства
+                    val decoder: RC4 = RC4(keyForUnitPassword)
+                    val decoderResult = decoder.decode(
+                        fullPackage.toByteArray(),
+                        fullPackage.toByteArray().size
+                    )
+                    resultUnitPasswordDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
+                } else if (countUserInfo == 1) { //получение формата файла
+                    val keyForUnitsFormat = "LightNameDevice".toByteArray() //это ключ для шифрования имени устройства
+                    val decoderF: RC4 = RC4(keyForUnitsFormat)
+                    val decoderResult = decoderF.decode(
+                        fullPackage.toByteArray(),
+                        fullPackage.toByteArray().size
+                    )
+                    resultUnitNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                }
+            } else { //если сумма не сошлась
+                audioRunning = false
+                val showWarning = Toast.makeText(
+                    this,
+                    "Данные не совпали, запросите их заново.",
+                    Toast.LENGTH_SHORT
+                )
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
+                showWarning.show()
+                return
             }
-        } else { //если сумма не сошлась
+        } else {
             audioRunning = false
             val showWarning = Toast.makeText(
                 this,
-                "Данные не совпали, запросите их заново.",
+                "Вы отключили режим приема.",
                 Toast.LENGTH_SHORT
             )
             showWarning.setGravity(
@@ -210,94 +217,13 @@ class MainActivityReceive: AppCompatActivity() {
                 0
             )
             showWarning.show()
-            stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
     }
 
     private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
-        if(countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
-            audioRunning = false
-            val showWarning = Toast.makeText(
-                this,
-                "Прием данных окончен.",
-                Toast.LENGTH_SHORT
-            )
-            showWarning.setGravity(
-                Gravity.CENTER,
-                0,
-                0
-            )
-            showWarning.show()
-            return
-        }
-
-        val dataBitsUsers: BitSet = (BitSet.valueOf(dataUsers)).get(0, dataUsers.size) //получаем данные в битах
-
-        if(dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]){//проверка на окончание данных
-            countPartFile++
-        }
-
-        var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
-        var dataBitsCrc: BitSet = BitSet(16) //crc
-        var count = 0 //для подсчета всех битов
-        var countCrc = 0 //для подсчета битов у crc
-        var countBits = 0 //для подсчета битов данных
-
-        while(count < 256) {
-            if((count < 222) || (count in 254..255))  dataBitsWithoutCrc[countBits++] = dataBitsUsers[count++] //получаем самму посылку без crc
-            else if ((count in 222..253) && (count % 2 == 0)) dataBitsCrc[countCrc++] = dataBitsUsers[count++] //получаем crc бещ доп битов
-        }
-
-        val crcForPack = crcPack(dataBitsWithoutCrc) //получили crc
-        var fullPackage: BitSet = BitSet(108) //для хранения только данных из файла
-        count = 2
-        countBits = 0
-
-        if(dataBitsCrc === crcForPack) { //проверяем совпадают ли суммы
-            while(count < 222) { //получаем посылку без доп бит
-                if((count % 2 == 0)) fullPackage[countBits++] = dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
-            }
-            //схема дешифрования
-            if (countPartFile == 0) { //получение имени файла
-                val keyForUnitsName = "LightName".toByteArray() //это ключ для шифрования имени файла
-                val decoder: RC4 = RC4(keyForUnitsName)
-                val decoderResult = decoder.decode(
-                    fullPackage.toByteArray(),
-                    fullPackage.toByteArray().size
-                )
-                resultFileNameDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
-            } else if (countPartFile == 1) { //получение формата файла
-                val keyForUnitsFormat = "LightFormat".toByteArray() //это ключ для шифрования формата файла
-                val decoderF: RC4 = RC4(keyForUnitsFormat)
-                val decoderResult = decoderF.decode(
-                    fullPackage.toByteArray(),
-                    fullPackage.toByteArray().size
-                )
-                resultFileNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-                InfoReceiveFiles.append(resultFileNameDecoder) //отображение имени файла на экране
-                InfoReceiveFiles.append(System.getProperty("line.separator")) //перенос строки для следующего файла
-            } else { //получение содержимого файла
-                val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
-                val decoderFile: RC4 = RC4(keyForUnitsFile)
-                val decoderResult = decoderFile.decode(
-                    fullPackage.toByteArray(),
-                    fullPackage.toByteArray().size
-                )
-                resultStrDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-            }
-
-            if(countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
-                applicationContext.openFileOutput(
-                    resultFileNameDecoder,
-                    Context.MODE_PRIVATE
-                ).use {
-                    it.write(resultStrDecoder.toByteArray())
-                }
-                countPartFile = 0
-                countFiles++
-            }
-            if(countFiles == 3) {//проверка что приняты все файлы
+        if (flagReceive) {
+            if (countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
                 audioRunning = false
                 val showWarning = Toast.makeText(
                     this,
@@ -310,12 +236,112 @@ class MainActivityReceive: AppCompatActivity() {
                     0
                 )
                 showWarning.show()
+                return
             }
-        } else { //если сумма не сошлась
+
+            val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(
+                0,
+                dataUsers.size
+            ) //получаем данные в битах
+
+            if (dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]) {//проверка на окончание данных
+                countPartFile++
+                if (countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
+                    applicationContext.openFileOutput(
+                        resultFileNameDecoder,
+                        Context.MODE_PRIVATE
+                    ).use {
+                        it.write(resultStrDecoder.toByteArray())
+                    }
+                    countPartFile = 0
+                    countFiles++
+                }
+
+                if (countFiles == 3) {//проверка что приняты все файлы
+                    audioRunning = false
+                    val showWarning = Toast.makeText(
+                        this,
+                        "Прием данных окончен.",
+                        Toast.LENGTH_SHORT
+                    )
+                    showWarning.setGravity(
+                        Gravity.CENTER,
+                        0,
+                        0
+                    )
+                    showWarning.show()
+                }
+                return
+            }
+
+            var dataBitsWithoutCrc: BitSet = BitSet(256) //для посылки без crc чтобы сравнить с ранее полученной
+            var dataBitsCrc: BitSet = BitSet(16) //crc
+            var count = 0 //для подсчета всех битов
+            var countCrc = 0 //для подсчета битов у crc
+            var countBits = 0 //для подсчета битов данных
+
+            while (count < 256) {
+                if ((count < 222) || (count in 254..255)) dataBitsWithoutCrc[countBits++] = dataBitsUsers[count++] //получаем самму посылку без crc
+                else if ((count in 222..253) && (count % 2 == 0)) dataBitsCrc[countCrc++] = dataBitsUsers[count++] //получаем crc бещ доп битов
+            }
+
+            val crcForPack = crcPack(dataBitsWithoutCrc) //получили crc
+            var fullPackage: BitSet = BitSet(108) //для хранения только данных из файла
+            count = 2
+            countBits = 0
+
+            if (dataBitsCrc === crcForPack) { //проверяем совпадают ли суммы
+                while (count < 222) { //получаем посылку без доп бит
+                    if ((count % 2 == 0)) fullPackage[countBits++] = dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
+                }
+                //схема дешифрования
+                if (countPartFile == 0) { //получение имени файла
+                    val keyForUnitsName = "LightName".toByteArray() //это ключ для шифрования имени файла
+                    val decoder: RC4 = RC4(keyForUnitsName)
+                    val decoderResult = decoder.decode(
+                        fullPackage.toByteArray(),
+                        fullPackage.toByteArray().size
+                    )
+                    resultFileNameDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
+                } else if (countPartFile == 1) { //получение формата файла
+                    val keyForUnitsFormat = "LightFormat".toByteArray() //это ключ для шифрования формата файла
+                    val decoderF: RC4 = RC4(keyForUnitsFormat)
+                    val decoderResult = decoderF.decode(
+                        fullPackage.toByteArray(),
+                        fullPackage.toByteArray().size
+                    )
+                    resultFileNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                    InfoReceiveFiles.append(resultFileNameDecoder) //отображение имени файла на экране
+                    InfoReceiveFiles.append(System.getProperty("line.separator")) //перенос строки для следующего файла
+                } else { //получение содержимого файла
+                    val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
+                    val decoderFile: RC4 = RC4(keyForUnitsFile)
+                    val decoderResult = decoderFile.decode(
+                        fullPackage.toByteArray(),
+                        fullPackage.toByteArray().size
+                    )
+                    resultStrDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                }
+            } else { //если сумма не сошлась
+                audioRunning = false
+                val showWarning = Toast.makeText(
+                    this,
+                    "Файл поврежден, повторите попытку передачи.",
+                    Toast.LENGTH_SHORT
+                )
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
+                showWarning.show()
+                return
+            }
+        } else {
             audioRunning = false
             val showWarning = Toast.makeText(
                 this,
-                "Файл поврежден, повторите попытку передачи.",
+                "Вы отключили режим приема.",
                 Toast.LENGTH_SHORT
             )
             showWarning.setGravity(
@@ -324,7 +350,6 @@ class MainActivityReceive: AppCompatActivity() {
                 0
             )
             showWarning.show()
-            stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
     }
@@ -342,6 +367,7 @@ class MainActivityReceive: AppCompatActivity() {
             )
 
             if (minBufferSize == AudioRecord.ERROR) {
+                audioRunning = false
                 val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
@@ -357,6 +383,7 @@ class MainActivityReceive: AppCompatActivity() {
                 return
             }
             if (minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
+                audioRunning = false
                 val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
@@ -381,6 +408,7 @@ class MainActivityReceive: AppCompatActivity() {
             )
 
             if (audioData.state != AudioRecord.STATE_INITIALIZED) {
+                audioRunning = false
                 val showWarning = Toast.makeText(
                     this,
                     "Что-то пошло не так, повторите попытку передачи.",
@@ -405,13 +433,14 @@ class MainActivityReceive: AppCompatActivity() {
 
             while (audioRunning) {
                 if (flagReceive) {
-                    var samplesRead: Int = audioData.read( //считывание данных
+                    val samplesRead: Int = audioData.read( //считывание данных
                         dataRecord,
                         0,
                         32
                     )
 
                     if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                        audioRunning = false
                         val showWarning = Toast.makeText(
                             this,
                             "Что-то пошло не так, повторите попытку передачи.",
@@ -427,6 +456,7 @@ class MainActivityReceive: AppCompatActivity() {
                         return
                     }
                     if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
+                        audioRunning = false
                         val showWarning = Toast.makeText(
                             this,
                             "Файл поврежден, повторите попытку передачи.",
@@ -454,6 +484,7 @@ class MainActivityReceive: AppCompatActivity() {
                         )
                     }
                 } else {
+                    audioRunning = false
                     val showWarning = Toast.makeText(
                         this,
                         "Прием остановлен пользователем, данные утеряны.",
@@ -465,12 +496,22 @@ class MainActivityReceive: AppCompatActivity() {
                         0
                     )
                     showWarning.show()
-                    stopAudio(audioData)
                     return
                 }
             }
 
-            stopAudio(audioData)
+            try {
+                try {
+                    audioData.stop() //останавливаем запись
+                } catch (e: IllegalStateException) {
+                    e.printStackTrace()
+                    return
+                }
+            }
+
+            finally { //освобождаем ресурсы
+                audioData.release()
+            }
         } else {
             val showWarning = Toast.makeText(
                 this,
