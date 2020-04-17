@@ -158,7 +158,7 @@ class MainActivitySend : AppCompatActivity() {
     private var count: Int = 0
     private var flagSend: Boolean = true
     private var flagComplete: Boolean = false
-    suspend fun splitPackage()
+    private suspend fun splitPackage()
     {
         var sendPackZero: BitSet = BitSet(256)
         ListArraySend.add(sendPackZero)
@@ -198,7 +198,7 @@ class MainActivitySend : AppCompatActivity() {
             showWarning.show()
         }}
 
-   suspend fun packageCreate(dataUsers: ByteArray) {
+    private suspend fun packageCreate(dataUsers: ByteArray) {
         var countIndex = 0
         var predel = 0
         var count = 0
@@ -268,7 +268,7 @@ class MainActivitySend : AppCompatActivity() {
         } while (outCircle <= size-1)
     }
 
-    suspend fun sendInformation() {
+    private suspend fun sendInformation() {
         var buffersize = AudioTrack.getMinBufferSize(
             44100,  //устанавливаем частоту с запасом
             AudioFormat.CHANNEL_OUT_MONO, // данные идут в левый канал, поэтому моно
@@ -385,7 +385,7 @@ class MainActivitySend : AppCompatActivity() {
                     val nameFileStr = arrayNameExection[0].toByteArray() //имя
                     val exectionFileStr = arrayNameExection[1].toByteArray() //расширение без точки
 
-                    val keyForUnitsName = "LightName".toByteArray(); //это ключ для шифрования имени файла
+                    val keyForUnitsName = "LightName".toByteArray() //это ключ для шифрования имени файла
                     val encoderN: RC4 = RC4(keyForUnitsName)
                     val encoderResultNameFile= encoderN.encode(nameFileStr, nameFileStr.size) //шифрование имени файла
 
