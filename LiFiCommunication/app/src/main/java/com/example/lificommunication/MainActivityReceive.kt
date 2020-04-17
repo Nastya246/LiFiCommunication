@@ -10,6 +10,7 @@ import android.os.Process.setThreadPriority
 import android.view.Gravity
 import android.view.View
 import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_recieve.*
@@ -36,16 +37,29 @@ class MainActivityReceive: AppCompatActivity() {
     private var resultUnitNameDecoder: String = "" //для хранения имени устройства
     private var resultUnitPasswordDecoder: String = "" //для хранения пароля устройства
 
+    private var password = "" //пароль заданный пользователем
+    private var nameDevice = "" //имя заданное пользователем
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
 
         val file = File("dataUser.txt")
         val switch: Switch = findViewById<Switch>(R.id.switchReceive)
+        val textView = findViewById<TextView>(R.id.nameDeviceConnectReceive) //вывод данных по нажатию на утсройство
 
         if (switch != null) {
             if (file.exists()) { //проверка существует ли файл с логином и паролем
                 if (file.length().toInt() != 0) { //проверка, что файл может быть пустым
+                    val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
+                    val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
+                    val inputBuffer = CharArray(22) //максимальный размер буфера
+                    inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
+                    val dataNamePassword = String(inputBuffer) //получили строку с данныими
+                    val arrayDataNamePassword = dataNamePassword.split(',')
+                    password = arrayDataNamePassword[0] //ключ безопасности
+                    nameDevice = arrayDataNamePassword[1] //имя устройства
+                    nameDeviceConnectReceive.text = nameDevice //отображение имени устройства
                     switch.setEnabled(true)
                     flagReceive = true
                     GlobalScope.launch {
@@ -96,6 +110,22 @@ class MainActivityReceive: AppCompatActivity() {
             )
             showWarning.show()
         }
+
+        if (textView != null) {
+            textView.setOnClickListener {
+                val showWarning = Toast.makeText(
+                    this,
+                    "Ваш ключ - $password",
+                    Toast.LENGTH_LONG
+                )
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
+                showWarning.show()
+            }
+        }
     }
 
     fun mainWindowOpen(view: View) {
@@ -116,21 +146,14 @@ class MainActivityReceive: AppCompatActivity() {
             if (dataBitsUsers[0] == dataBitsUsers[1] == dataBitsUsers[2] == dataBitsUsers[4]) {//проверка на окончание данных
                 countUserInfo++
                 if (countUserInfo >= 2) { //когда прием данных авторизации закончен, осуществляется проверка их на соответствие
-                    val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
-                    val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
-                    val inputBuffer = CharArray(22) //максимальный размер буфера
-                    inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
-                    val dataNamePassword = String(inputBuffer) //получили строку с данныими
-                    var arrayDataNamePassword = dataNamePassword.split(',')
-                    val password = arrayDataNamePassword[0] //ключ безопасности
-                    val nameDevice = arrayDataNamePassword[1] //имя устройства
                     countUserInfo=0
 
                     if (resultUnitPasswordDecoder === password) {
                         userLogin = true
                         userPassword = true
 
-                        nameDeviceConnectReceive.text = resultUnitNameDecoder //отображение имени передающего устройства
+                        nameDeviceConnectReceive.append(System.getProperty("line.separator"))
+                        nameDeviceConnectReceive.append(resultUnitNameDecoder) //отображение имени передающего устройства
                     } else { //если данные не совпали
                         audioRunning = false
                         val showWarning = Toast.makeText(
@@ -144,7 +167,6 @@ class MainActivityReceive: AppCompatActivity() {
                             0
                         )
                         showWarning.show()
-                        return
                     }
                 }
 
@@ -255,6 +277,17 @@ class MainActivityReceive: AppCompatActivity() {
                     }
                     countPartFile = 0
                     countFiles++
+                    val showWarning = Toast.makeText(
+                        this,
+                        "Файл $resultFileNameDecoder загружен.",
+                        Toast.LENGTH_SHORT
+                    )
+                    showWarning.setGravity(
+                        Gravity.CENTER,
+                        0,
+                        0
+                    )
+                    showWarning.show()
                 }
 
                 if (countFiles == 3) {//проверка что приняты все файлы

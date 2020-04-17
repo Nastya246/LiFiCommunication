@@ -31,12 +31,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameDeviceConnectReceive" />
 
-    <CheckBox
+    <TextView
         android:id="@+id/nameDeviceConnectReceive"
         android:layout_width="332dp"
         android:layout_height="45dp"
         android:layout_marginTop="16dp"
         android:text="Имя устройства"
+        android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="@+id/infoAboutCommunicationReceive"
         app:layout_constraintTop_toBottomOf="@+id/infoAboutCommunicationReceive"
