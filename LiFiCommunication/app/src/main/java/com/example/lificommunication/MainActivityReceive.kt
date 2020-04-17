@@ -13,6 +13,8 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_recieve.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -46,7 +48,9 @@ class MainActivityReceive: AppCompatActivity() {
                 if (file.length().toInt() != 0) { //проверка, что файл может быть пустым
                     switch.setEnabled(true)
                     flagReceive = true
-                    recieveData()
+                    GlobalScope.launch {
+                        receiveData()
+                    }
                 } else {
                     switch.setEnabled(false)
                     val showWarning = Toast.makeText(
@@ -54,7 +58,11 @@ class MainActivityReceive: AppCompatActivity() {
                         "Что-то пошло не так, укажите логин и пароль для устройства.",
                         Toast.LENGTH_SHORT
                     )
-                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.setGravity(
+                        Gravity.CENTER,
+                        0,
+                        0
+                    )
                     showWarning.show()
                 }
             } else {
@@ -64,7 +72,11 @@ class MainActivityReceive: AppCompatActivity() {
                     "Необходимо указать логин и пароль для устройства.",
                     Toast.LENGTH_SHORT
                 )
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
                 showWarning.show()
             }
         } else {
@@ -75,13 +87,20 @@ class MainActivityReceive: AppCompatActivity() {
                 "Вы отключили режим приема.",
                 Toast.LENGTH_SHORT
             )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.setGravity(
+                Gravity.CENTER,
+                0,
+                0
+            )
             showWarning.show()
         }
     }
 
     fun mainWindowOpen(view: View) {
-        val mainIntent = Intent(this, MainActivity::class.java)
+        val mainIntent = Intent(
+            this,
+            MainActivity::class.java
+        )
         startActivity(mainIntent)
     }
 
@@ -125,19 +144,24 @@ class MainActivityReceive: AppCompatActivity() {
 
         if(dataBitsCrc === crcForPack) { //проверяем совпадают ли суммы
             while (count < 222) { //получаем посылку без доп бит
-                if ((count % 2 == 0)) fullPackage[countBits++] =
-                    dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
+                if ((count % 2 == 0)) fullPackage[countBits++] = dataBitsWithoutCrc[count++] //получаем самму посылку без доп битов, а также без старт и стоп битов
             }
             //схема дешифрования
             if (countUserInfo == 0) { //получение имени файла
                 val keyForUnitPassword = "LightNamePassw".toByteArray() //это ключ для шифрования пароля устройства
                 val decoder: RC4 = RC4(keyForUnitPassword)
-                val decoderResult = decoder.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
+                val decoderResult = decoder.decode(
+                    fullPackage.toByteArray(),
+                    fullPackage.toByteArray().size
+                )
                 resultUnitPasswordDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
             } else if (countUserInfo == 1) { //получение формата файла
                 val keyForUnitsFormat = "LightNameDevice".toByteArray() //это ключ для шифрования имени устройства
                 val decoderF: RC4 = RC4(keyForUnitsFormat)
-                val decoderResult = decoderF.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
+                val decoderResult = decoderF.decode(
+                    fullPackage.toByteArray(),
+                    fullPackage.toByteArray().size
+                )
                 resultUnitNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
             }
 
@@ -163,7 +187,11 @@ class MainActivityReceive: AppCompatActivity() {
                         "Данные не совпали, запросите их заново.",
                         Toast.LENGTH_SHORT
                     )
-                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.setGravity(
+                        Gravity.CENTER,
+                        0,
+                        0
+                    )
                     showWarning.show()
                     stopAudio(audioData) //принудительная остановка приема, если данные не сопадают
                     return
@@ -176,7 +204,11 @@ class MainActivityReceive: AppCompatActivity() {
                 "Данные не совпали, запросите их заново.",
                 Toast.LENGTH_SHORT
             )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.setGravity(
+                Gravity.CENTER,
+                0,
+                0
+            )
             showWarning.show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
@@ -191,7 +223,11 @@ class MainActivityReceive: AppCompatActivity() {
                 "Прием данных окончен.",
                 Toast.LENGTH_SHORT
             )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.setGravity(
+                Gravity.CENTER,
+                0,
+                0
+            )
             showWarning.show()
             return
         }
@@ -226,24 +262,36 @@ class MainActivityReceive: AppCompatActivity() {
             if (countPartFile == 0) { //получение имени файла
                 val keyForUnitsName = "LightName".toByteArray() //это ключ для шифрования имени файла
                 val decoder: RC4 = RC4(keyForUnitsName)
-                val decoderResult = decoder.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
+                val decoderResult = decoder.decode(
+                    fullPackage.toByteArray(),
+                    fullPackage.toByteArray().size
+                )
                 resultFileNameDecoder = decoderResult.toString(Charsets.UTF_8) + "."//смотрим что получили после дешифрования
             } else if (countPartFile == 1) { //получение формата файла
                 val keyForUnitsFormat = "LightFormat".toByteArray() //это ключ для шифрования формата файла
                 val decoderF: RC4 = RC4(keyForUnitsFormat)
-                val decoderResult = decoderF.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
+                val decoderResult = decoderF.decode(
+                    fullPackage.toByteArray(),
+                    fullPackage.toByteArray().size
+                )
                 resultFileNameDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
                 InfoReceiveFiles.append(resultFileNameDecoder) //отображение имени файла на экране
                 InfoReceiveFiles.append(System.getProperty("line.separator")) //перенос строки для следующего файла
             } else { //получение содержимого файла
                 val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
                 val decoderFile: RC4 = RC4(keyForUnitsFile)
-                val decoderResult = decoderFile.decode(fullPackage.toByteArray(), fullPackage.toByteArray().size)
+                val decoderResult = decoderFile.decode(
+                    fullPackage.toByteArray(),
+                    fullPackage.toByteArray().size
+                )
                 resultStrDecoder += decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
             }
 
             if(countPartFile >= 3) {//когда закончен прием всех данных создается файл со всем содержимым
-                applicationContext.openFileOutput(resultFileNameDecoder, Context.MODE_PRIVATE).use {
+                applicationContext.openFileOutput(
+                    resultFileNameDecoder,
+                    Context.MODE_PRIVATE
+                ).use {
                     it.write(resultStrDecoder.toByteArray())
                 }
                 countPartFile = 0
@@ -256,7 +304,11 @@ class MainActivityReceive: AppCompatActivity() {
                     "Прием данных окончен.",
                     Toast.LENGTH_SHORT
                 )
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
                 showWarning.show()
             }
         } else { //если сумма не сошлась
@@ -266,18 +318,23 @@ class MainActivityReceive: AppCompatActivity() {
                 "Файл поврежден, повторите попытку передачи.",
                 Toast.LENGTH_SHORT
             )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.setGravity(
+                Gravity.CENTER,
+                0,
+                0
+            )
             showWarning.show()
             stopAudio(audioData) //принудительная остановка приема, если сумма не сошлась
             return
         }
     }
 
-    private fun recieveData () {
+    private fun receiveData () {
         if(flagReceive) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
             var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
+            var samplesRead: Int = 0
 
             val minBufferSize = AudioRecord.getMinBufferSize(
                 44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
@@ -291,7 +348,11 @@ class MainActivityReceive: AppCompatActivity() {
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
                 )
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
                 showWarning.show()
                 System.err.println("getMinBufferSize returned ERROR")
                 return
@@ -302,14 +363,18 @@ class MainActivityReceive: AppCompatActivity() {
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
                 )
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
                 showWarning.show()
                 System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
                 return
             }
 
             val audioData: AudioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
                 44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
                 AudioFormat.ENCODING_PCM_16BIT, //формат входных данных, более известный как кодек
@@ -322,7 +387,11 @@ class MainActivityReceive: AppCompatActivity() {
                     "Что-то пошло не так, повторите попытку передачи.",
                     Toast.LENGTH_SHORT
                 )
-                showWarning.setGravity(Gravity.CENTER, 0, 0)
+                showWarning.setGravity(
+                    Gravity.CENTER,
+                    0,
+                    0
+                )
                 showWarning.show()
                 System.err.println("getState() != STATE_INITIALIZED")
                 return
@@ -337,7 +406,13 @@ class MainActivityReceive: AppCompatActivity() {
 
             while (audioRunning) {
                 if (flagReceive) {
-                    val samplesRead: Int = audioData.read(dataRecord, 0, 32) //считывание данных
+                    GlobalScope.launch {
+                        samplesRead = audioData.read( //считывание данных
+                            dataRecord,
+                            0,
+                            32
+                        )
+                    }
 
                     if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
                         val showWarning = Toast.makeText(
@@ -345,7 +420,11 @@ class MainActivityReceive: AppCompatActivity() {
                             "Что-то пошло не так, повторите попытку передачи.",
                             Toast.LENGTH_SHORT
                         )
-                        showWarning.setGravity(Gravity.CENTER, 0, 0)
+                        showWarning.setGravity(
+                            Gravity.CENTER,
+                            0,
+                            0
+                        )
                         showWarning.show()
                         System.err.println("read() returned ERROR_INVALID_OPERATION")
                         return
@@ -356,24 +435,38 @@ class MainActivityReceive: AppCompatActivity() {
                             "Файл поврежден, повторите попытку передачи.",
                             Toast.LENGTH_SHORT
                         )
-                        showWarning.setGravity(Gravity.CENTER, 0, 0)
+                        showWarning.setGravity(
+                            Gravity.CENTER,
+                            0,
+                            0
+                        )
                         showWarning.show()
                         System.err.println("read() returned ERROR_BAD_VALUE")
                         return
                     }
 
-                    if (userLogin && userPassword) fileCreate(
-                        dataRecord,
-                        audioData
-                    ) //посылаем данные на обработку
-                    else userConfirm(dataRecord, audioData)
+                    if (userLogin && userPassword) {
+                        fileCreate(
+                            dataRecord,
+                            audioData
+                        )
+                    } else if (samplesRead == 32) {//посылаем данные на обработку
+                        userConfirm(
+                            dataRecord,
+                            audioData
+                        )
+                    }
                 } else {
                     val showWarning = Toast.makeText(
                         this,
                         "Прием остановлен пользователем, данные утеряны.",
                         Toast.LENGTH_SHORT
                     )
-                    showWarning.setGravity(Gravity.CENTER, 0, 0)
+                    showWarning.setGravity(
+                        Gravity.CENTER,
+                        0,
+                        0
+                    )
                     showWarning.show()
                     stopAudio(audioData)
                     return
@@ -387,7 +480,11 @@ class MainActivityReceive: AppCompatActivity() {
                 "Прием данных отключен.",
                 Toast.LENGTH_SHORT
             )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
+            showWarning.setGravity(
+                Gravity.CENTER,
+                0,
+                0
+            )
             showWarning.show()
             return
         }
