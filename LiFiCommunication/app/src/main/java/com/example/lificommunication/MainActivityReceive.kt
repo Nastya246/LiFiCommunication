@@ -142,7 +142,7 @@ class MainActivityReceive: AppCompatActivity() {
         startActivity(mainIntent)
     }
 
-    private fun userConfirm(dataUsers: ByteArray, audioData: AudioRecord) {
+    private fun userConfirm(dataUsers: ByteArray) {
         if (flagReceive) {
             val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(
                 0,
@@ -252,7 +252,7 @@ class MainActivityReceive: AppCompatActivity() {
         }
     }
 
-    private fun fileCreate(dataUsers: ByteArray, audioData: AudioRecord) {
+    private fun fileCreate(dataUsers: ByteArray) {
         if (flagReceive) {
             if (countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
                 audioRunning = false
