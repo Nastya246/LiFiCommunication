@@ -524,15 +524,9 @@ class MainActivityReceive: AppCompatActivity() {
                     }
 
                     if (userLogin && userPassword) {
-                        fileCreate(
-                            dataRecord,
-                            audioData
-                        )
+                        fileCreate(dataRecord)
                     } else if (samplesRead == 32) {//посылаем данные на обработку
-                        userConfirm(
-                            dataRecord,
-                            audioData
-                        )
+                        userConfirm(dataRecord)
                     }
                 } else {
                     audioRunning = false
