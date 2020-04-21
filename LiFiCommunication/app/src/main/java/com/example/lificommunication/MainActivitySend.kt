@@ -19,7 +19,6 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main_recieve.*
 import kotlinx.android.synthetic.main.activity_main_send.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -109,93 +108,84 @@ class MainActivitySend : AppCompatActivity() {
         val inputBuffer = CharArray(22) //максимальный размер буфера
         inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
         val dataNamePassw = String(inputBuffer) //получили строку с данныими
-        var arrayDataNamePasw= dataNamePassw.split(',')
-        val passw= arrayDataNamePasw[0].toByteArray() //ключ безопасности
-        val nameDevice= arrayDataNamePasw[1].toByteArray() //имя устройства
-        nameDeviceConnectSend.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
-        nameDeviceConnectSend.setTextColor(Color.BLUE)
-        nameDeviceConnectSend.setText(arrayDataNamePasw[1])
-        val keyForPassw = "LightNamePassw".toByteArray() //это ключ для шифрования ключа пароля безопасности
-        val encoderKeyPassw: RC4 = RC4(keyForPassw)
-        val encoderResultPassw= encoderKeyPassw.encode(passw, passw.size) //шифрование пароля безопасности
+        if (dataNamePassw!=null) {
+            switchSend.isEnabled=true
+            var arrayDataNamePasw= dataNamePassw.split(',')
+            val passw= arrayDataNamePasw[0].toByteArray() //ключ безопасности
+            val nameDevice= arrayDataNamePasw[1].toByteArray() //имя устройства
+            nameDeviceConnectSend.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
+            nameDeviceConnectSend.setTextColor(Color.BLUE)
+            nameDeviceConnectSend.setText(arrayDataNamePasw[1])
+            val keyForPassw = "LightNamePassw".toByteArray() //это ключ для шифрования ключа пароля безопасности
+            val encoderKeyPassw: RC4 = RC4(keyForPassw)
+            val encoderResultPassw= encoderKeyPassw.encode(passw, passw.size) //шифрование пароля безопасности
 
-        val keyForNameDevice = "LightNameDevice".toByteArray() //это ключ для шифрования ключа имени устройства
-        val encoderKeyDevice: RC4 = RC4(keyForNameDevice)
-        val encoderResultNameDevice= encoderKeyDevice.encode(nameDevice, nameDevice.size) //шифрование имени устройства
-        GlobalScope.launch {
-            packageCreate(encoderResultPassw) //формирование посылки для пароля безопасности
-            splitPackage() //разделяем данные
-            packageCreate(encoderResultNameDevice) //для имени устройства
-            splitPackage()
-        }
-        val nameDeviceText = findViewById<TextView>(R.id.nameDeviceConnectSend) //вывод данных по нажатию на утсройство
-        if (nameDeviceText != null) {
-           nameDeviceText.setOnClickListener {
-                    val showWarning = Toast.makeText(
-                        this,
-                        "Ваш ключ - "+ arrayDataNamePasw[0],
-                        Toast.LENGTH_LONG
-                    )
-                    showWarning.setGravity(Gravity.CENTER, 0, 0)
-                    showWarning.show()
-                 } }
-        val switchSend = findViewById<Switch>(R.id.switchSend) //проверка переключателя switch
-        if (switchSend != null) {
-            switchSend.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked) flagSend = true
-                else {
-                    flagSend = false
-                    val showWarning = Toast.makeText(
-                        this,
-                        "Вы отключили режим передачи",
-                        Toast.LENGTH_SHORT
-                    )
-                    showWarning.setGravity(Gravity.CENTER, 0, 0)
-                    showWarning.show()
-                } } } }
+            val keyForNameDevice = "LightNameDevice".toByteArray() //это ключ для шифрования ключа имени устройства
+            val encoderKeyDevice: RC4 = RC4(keyForNameDevice)
+            val encoderResultNameDevice= encoderKeyDevice.encode(nameDevice, nameDevice.size) //шифрование имени устройства
+            GlobalScope.launch {
+                packageCreate(encoderResultPassw) //формирование посылки для пароля безопасности
+                splitPackage() //разделяем данные
+                packageCreate(encoderResultNameDevice) //для имени устройства
+                splitPackage()
+            }
+            val nameDeviceText = findViewById<TextView>(R.id.nameDeviceConnectSend) //вывод данных по нажатию на утсройство
+            if (nameDeviceText != null) {
+               nameDeviceText.setOnClickListener {
+                   infoForUser("Ваш ключ - "+ arrayDataNamePasw[0], Toast.LENGTH_LONG)
+                     } }
+            val switchSend = findViewById<Switch>(R.id.switchSend) //проверка переключателя switch
+            if (switchSend != null) {
+                switchSend.setOnCheckedChangeListener { buttonView, isChecked ->
+                    if (isChecked) flagSend = true
+                    else {
+                        flagSend = false
+                        infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT) } } } }
+    else {
+            switchSend.isEnabled=false
+            infoForUser("Задайте имя устройства и ключ безопасности в настройках приложения", Toast.LENGTH_LONG)
+        }}
     var ListArraySend = arrayListOf<BitSet>() //здесь храним посылки
     private val arrayFiles = arrayOfNulls<Uri>(3)
     private var count: Int = 0
     private var flagSend: Boolean = true
     private var flagComplete: Boolean = false
+    private fun infoForUser(messageForUser:String, long:Int)
+    {
+        val showWarning = Toast.makeText(
+            this,
+            messageForUser,long)
+        showWarning.setGravity(Gravity.CENTER, 0, 0)
+        showWarning.show()
+    }
     private suspend fun splitPackage()
     {
         var sendPackZero: BitSet = BitSet(256)
         ListArraySend.add(sendPackZero)
     }
-    fun addFile(view: View) {
+     fun addFile(view: View) {
         val intent = Intent().setType("*/*")
             .setAction(Intent.ACTION_GET_CONTENT) //Выбор любого типа файла
         try {
             startActivityForResult(Intent.createChooser(intent, "Выберите файл..."), 111)
         } catch (e: Exception) {
-            Toast.makeText(this, "Пожалуйста установите файловый менеджер.", Toast.LENGTH_SHORT)
-                .show()
+            infoForUser("Установите файловый менеджер!", Toast.LENGTH_SHORT)
         } }
 
-    fun sendData(view: View?) {
-        if (flagComplete)
-        { if (!flagSend) {
-            val showWarning = Toast.makeText(
-                this,
-                "Вы отключили режим передачи",
-                Toast.LENGTH_SHORT
-            )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
-            showWarning.show()
+     fun sendData(view: View?) {
+        if (flagComplete) {
+            if (!flagSend) {
+            infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT)
         }
         else {
             val taskSend = GlobalScope.launch {
                 if (flagSend) sendInformation()
             } }}
+    else if (arrayFiles[0]==null) {
+            infoForUser("Нет выбранных файлов", Toast.LENGTH_SHORT)
+        }
     else {
-            val showWarning = Toast.makeText(
-                this,
-                "Дождитесь окончания операции",
-                Toast.LENGTH_SHORT
-            )
-            showWarning.setGravity(Gravity.CENTER, 0, 0)
-            showWarning.show()
+            infoForUser("Дождитесь окончания операции", Toast.LENGTH_LONG)
         }}
 
     private suspend fun packageCreate(dataUsers: ByteArray) {
@@ -238,8 +228,7 @@ class MainActivitySend : AppCompatActivity() {
                     sendPackTemp[count] = false
                     count++
                     sendPackTemp[count] = true
-                }
-            }
+                } }
           //получили посылку без crc
             var countThirdCircleForCrc: Int = outCircle + countIndex * 109+3
             outCircle++
@@ -251,8 +240,7 @@ class MainActivitySend : AppCompatActivity() {
                     countThirdCircleForCrc++
                     sendPackTemp[countThirdCircleForCrc] = true
                     countThirdCircleForCrc++
-                }
-            }
+                } }
             for (n in 0..(sizeCircle)) { //добавляем в посылку crc
                 sendPackTemp[countThirdCircleForCrc] = crcForPack[n]
                 countThirdCircleForCrc++
@@ -260,8 +248,7 @@ class MainActivitySend : AppCompatActivity() {
                     sendPackTemp[countThirdCircleForCrc++] = false
                     countThirdCircleForCrc++
                     sendPackTemp[countThirdCircleForCrc++] = true
-                }
-            }
+                } }
             unitPackSend = sendPackTemp
             ListArraySend.add(unitPackSend) //добавляем в глобальную переменную преобразованные данные для дальнейшей отправки
             countIndex++
@@ -358,11 +345,11 @@ class MainActivitySend : AppCompatActivity() {
             var selectedFile = data?.data //The uri with the location of the file
             var matchResult = Regex("""([^%2F]*)$""").find(selectedFile.toString())
             if (matchResult === null) {
-                Toast.makeText(this, "Ничего не выбрано для отправки.", Toast.LENGTH_SHORT).show()
+                infoForUser("Ничего не выбранно для отправки", Toast.LENGTH_SHORT)
                 return
             }
             if (count >= 3) {
-                Toast.makeText(this, "Вы не можете выбрать больше трех файлов.", Toast.LENGTH_SHORT).show()
+                infoForUser("Вы не можете выбрать более 3 файлов", Toast.LENGTH_SHORT)
                 return
             }
             arrayFiles[count]=selectedFile
@@ -400,6 +387,7 @@ class MainActivitySend : AppCompatActivity() {
                     var arrayText = InfoAddFiles.text.split("...")
                     InfoAddFiles.setTextColor(Color.BLUE)
                     InfoAddFiles.setText(arrayText[0].trimEnd()+" ... Пожалуйста, подождите")
+
                     GlobalScope.launch() {
                         packageCreate(encoderResultNameFile) //формирование посылки для имени файла
                         splitPackage()
@@ -414,24 +402,9 @@ class MainActivitySend : AppCompatActivity() {
                         withContext(Dispatchers.Main) {
                             InfoAddFiles.setTextColor(Color.GRAY)
                             InfoAddFiles.setText(arrayText[0])
-                        } }
-                    /*схема дешифрования:
-                    val decoder: RC4 = RC4(keyForUnitsName)
-                    var decoderResult = decoder.Decode(encoderResultNameFile, encoderResultNameFile.size)
-                    val resultStrDecoder = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
+                        } } } } } } } }
 
-
-                    val decoderF: RC4 = RC4(keyForUnitsFormat)
-                    decoderResult = decoderF.Decode(encoderResultFormatFile, encoderResultFormatFile.size)
-                    val resultStrDecoderF = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-
-                    val decoderFile: RC4 = RC4(keyForUnitsFile)
-                    decoderResult = decoderFile.Decode(encoderResultFile, encoderResultFile.size)
-                    val resultStrDecoderFile = decoderResult.toString(Charsets.UTF_8) //смотрим что получили после дешифрования
-                    var t3 = resultStrDecoderFile*/
-                } } } } } }
-
-    fun sendMain (view: View) {
+        fun sendMain (view: View) {
         val sendMain = Intent(this, MainActivity::class.java)
         startActivity(sendMain)
     }
