@@ -38,6 +38,7 @@ class MainActivityReceive: AppCompatActivity() {
     private var resultUnitNameDecoder: String = "" //для хранения имени устройства
     private var resultUnitPasswordDecoder: String = "" //для хранения пароля устройства
 
+    private var dataNamePassword = "" //считываемые данные из файла
     private var password = "" //пароль заданный пользователем
     private var nameDevice = "" //имя заданное пользователем
 
@@ -45,28 +46,37 @@ class MainActivityReceive: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
 
-        val file = File("/data/data/LiFicommunication/files/dataUser.txt")
         switch = findViewById<Switch>(R.id.switchReceive)
         val textView = findViewById<TextView>(R.id.nameDeviceConnectReceive) //вывод данных по нажатию на утсройство
 
+        try { //проверка существует ли файл с логином и паролем
+            val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
+            val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
+            val inputBuffer = CharArray(22) //максимальный размер буфера
+            inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
+            dataNamePassword = String(inputBuffer) //получили строку с данныими
+        } catch (e: IllegalStateException) {
+            switch.setEnabled(false)
+            flagReceive = false
+            showWarning("Необходимо указать логин и пароль для устройства.")
+            return
+        }
+
         if (switch != null) {
-            if (file.exists()) { //проверка существует ли файл с логином и паролем
-                if (file.length().toInt() != 0) { //проверка, что файл может быть пустым
-                    switch.setEnabled(true)
-                    flagReceive = true
-                    GlobalScope.launch {
-                        receiveData()
-                    }
-                } else {
-                    switch.setEnabled(false)
-                    flagReceive = false
-                    showWarning("Что-то пошло не так, укажите логин и пароль для устройства.")
-                    return
+            if (dataNamePassword != "") { //проверка, что файл может быть пустым
+                val arrayDataNamePassword = dataNamePassword.split(',')
+                password = arrayDataNamePassword[0] //ключ безопасности
+                nameDevice = arrayDataNamePassword[1] //имя устройства
+                nameDeviceConnectReceive.text = nameDevice //отображение имени устройства
+                switch.setEnabled(true)
+                flagReceive = true
+                GlobalScope.launch {
+                    receiveData()
                 }
             } else {
                 switch.setEnabled(false)
                 flagReceive = false
-                showWarning("Необходимо указать логин и пароль для устройства.")
+                showWarning("Что-то пошло не так, укажите логин и пароль для устройства.")
                 return
             }
         } else {
@@ -75,16 +85,6 @@ class MainActivityReceive: AppCompatActivity() {
             showWarning("Вы отключили режим приема.")
             return
         }
-
-        val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
-        val inputStreamFileUser = InputStreamReader(fileInputDataUser) //поток для чтения
-        val inputBuffer = CharArray(22) //максимальный размер буфера
-        inputStreamFileUser.read(inputBuffer) //запись из файла в буфер
-        val dataNamePassword = String(inputBuffer) //получили строку с данныими
-        val arrayDataNamePassword = dataNamePassword.split(',')
-        password = arrayDataNamePassword[0] //ключ безопасности
-        nameDevice = arrayDataNamePassword[1] //имя устройства
-        nameDeviceConnectReceive.text = nameDevice //отображение имени устройства
 
         if (textView != null) {
             textView.setOnClickListener {
