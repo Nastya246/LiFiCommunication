@@ -301,7 +301,7 @@ class MainActivityReceive: AppCompatActivity() {
             audioRunning = true
             var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
             val minBufferSize = AudioRecord.getMinBufferSize(
-                44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
+                8000,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
                 AudioFormat.ENCODING_PCM_16BIT //формат входных данных, более известный как кодек
             )
@@ -324,7 +324,7 @@ class MainActivityReceive: AppCompatActivity() {
 
             val audioData: AudioRecord = AudioRecord(
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
-                44100,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
+                8000,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
                 AudioFormat.ENCODING_PCM_16BIT, //формат входных данных, более известный как кодек
                 minBufferSize * 10 //размер самого внутреннего буфера

@@ -267,7 +267,7 @@ class MainActivitySend : AppCompatActivity() {
                 .build(),
             AudioFormat.Builder().setEncoding(ENCODING_PCM_16BIT)
                 .setChannelMask(CHANNEL_OUT_MONO)
-                .setSampleRate(44100)
+                .setSampleRate(8000)
                 .build(),
             buffersize,
             AudioTrack.MODE_STREAM,
@@ -305,8 +305,7 @@ class MainActivitySend : AppCompatActivity() {
             trackplayer.write(
                 arrayData.toByteArray(),
                 0,
-                buffersize
-            ) // пишем данные в цап мобильного
+                buffersize) // пишем данные в цап мобильного
             withContext(Dispatchers.Main)
             {
                 var arrayText = InfoAddFiles.text.split("...")
@@ -404,7 +403,7 @@ class MainActivitySend : AppCompatActivity() {
                             InfoAddFiles.setText(arrayText[0])
                         } } } } } } } }
 
-        fun sendMain (view: View) {
+    fun sendMain (view: View) {
         val sendMain = Intent(this, MainActivity::class.java)
         startActivity(sendMain)
     }
