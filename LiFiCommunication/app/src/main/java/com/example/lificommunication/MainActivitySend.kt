@@ -150,6 +150,12 @@ class MainActivitySend : AppCompatActivity() {
     private var count: Int = 0
     private var flagSend: Boolean = true
     private var flagComplete: Boolean = false
+    private fun statusPack(source:CharSequence, messageForUser:String, colorText:Int)
+    {
+        var arrayText = source.split("...")
+        InfoAddFiles.setTextColor(colorText)
+        InfoAddFiles.setText(arrayText[0].trimEnd() + " ... " + messageForUser )
+    }
     private fun infoForUser(messageForUser:String, long:Int)
     {
         val showWarning = Toast.makeText(
@@ -276,55 +282,39 @@ class MainActivitySend : AppCompatActivity() {
         var arrayData: BitSet = BitSet(ListArraySend.count()*256)
         var tempcountArray=0
         withContext(Dispatchers.Main) {
-            var arrayText = InfoAddFiles.text.split("...")
-            InfoAddFiles.setTextColor(Color.BLUE)
-            InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Подготовка данных " )
+            statusPack(InfoAddFiles.text,"Подготовка данных ", Color.BLUE)
         }
         for (n in ListArraySend)
-        {
-            if (flagSend) {
+        { if (flagSend) {
                 for (t in 0..255) {
                     arrayData[tempcountArray] = n[t]
                     tempcountArray++
                 } }
             else
             {   withContext(Dispatchers.Main)
-                {
-                    var arrayText = InfoAddFiles.text.split("...")
-                    InfoAddFiles.setTextColor(Color.RED)
-                    InfoAddFiles.setText(arrayText[0]+" ... Прервано")
+                { statusPack(InfoAddFiles.text,"Прервано! ", Color.RED)
                 }
-                return
-            } }
+                return } }
         if (flagSend) {
             withContext(Dispatchers.Main) {
-                var arrayText = InfoAddFiles.text.split("...")
-                InfoAddFiles.setTextColor(Color.BLACK)
-                InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача" )
+                statusPack(InfoAddFiles.text,"Идет передача ", Color.BLACK)
             }
             if (trackplayer.write(
                 arrayData.toByteArray(),
                 0,
                 buffersize)>=0) // пишем данные в цап мобильного
-            {
-                withContext(Dispatchers.Main)
-                {
-                    var arrayText = InfoAddFiles.text.split("...")
-                    InfoAddFiles.setTextColor(Color.GREEN)
-                    InfoAddFiles.setText(arrayText[0].trimEnd()+ " ... Отправлено!")
-                }
+            { withContext(Dispatchers.Main)
+                { statusPack(InfoAddFiles.text,"Отправлено! ", Color.GREEN) }
             }
-
+            else { withContext(Dispatchers.Main)
+                { statusPack(InfoAddFiles.text,"Ошибка при передаче! ", Color.RED)
+                } }
         }
         else {
             withContext(Dispatchers.Main)
-            {
-                var arrayText = InfoAddFiles.text.split("...")
-                InfoAddFiles.setTextColor(Color.RED)
-                InfoAddFiles.setText(arrayText[0].trimEnd()+" ... Прервано")
+            { statusPack(InfoAddFiles.text,"Прервано! ", Color.RED)
             }
-            return
-        } }
+            return } }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -409,5 +399,4 @@ class MainActivitySend : AppCompatActivity() {
     fun sendMain (view: View) {
         val sendMain = Intent(this, MainActivity::class.java)
         startActivity(sendMain)
-    }
-}
+    } }
