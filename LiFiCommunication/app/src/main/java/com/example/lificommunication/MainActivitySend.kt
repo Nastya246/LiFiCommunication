@@ -302,16 +302,19 @@ class MainActivitySend : AppCompatActivity() {
                 InfoAddFiles.setTextColor(Color.BLACK)
                 InfoAddFiles.setText(arrayText[0].trimEnd() + " ... Идет передача" )
             }
-            trackplayer.write(
+            if (trackplayer.write(
                 arrayData.toByteArray(),
                 0,
-                buffersize) // пишем данные в цап мобильного
-            withContext(Dispatchers.Main)
+                buffersize)>=0) // пишем данные в цап мобильного
             {
-                var arrayText = InfoAddFiles.text.split("...")
-                InfoAddFiles.setTextColor(Color.GREEN)
-                InfoAddFiles.setText(arrayText[0].trimEnd()+ " ... Отправлено!")
+                withContext(Dispatchers.Main)
+                {
+                    var arrayText = InfoAddFiles.text.split("...")
+                    InfoAddFiles.setTextColor(Color.GREEN)
+                    InfoAddFiles.setText(arrayText[0].trimEnd()+ " ... Отправлено!")
+                }
             }
+
         }
         else {
             withContext(Dispatchers.Main)
