@@ -1,17 +1,22 @@
 package com.example.lificommunication
+
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioAttributes.USAGE_MEDIA
+import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioFormat.CHANNEL_OUT_MONO
 import android.media.AudioFormat.ENCODING_PCM_16BIT
-import android.media.AudioManager.AUDIO_SESSION_ID_GENERATE
-import android.media.AudioManager.STREAM_MUSIC
+import android.media.AudioManager
+import android.media.AudioManager.*
 import android.media.AudioTrack
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -28,6 +33,7 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
 import kotlin.experimental.xor
+
 
 class RC4 (key: ByteArray){
     var perestanovki = IntArray (256, {0})
@@ -97,7 +103,11 @@ fun crcPack (packData:BitSet): BitSet  {//подсчет crc и преобраз
 }
 
 class MainActivitySend : AppCompatActivity() {
-
+    private val arrayFiles = arrayOfNulls<Uri>(3)
+    private var count: Int = 0
+    private var flagSend: Boolean = true
+    private var flagComplete: Boolean = false
+    private var ListArraySend = arrayListOf<BitSet>() //здесь храним посылки
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_send)
@@ -145,11 +155,7 @@ class MainActivitySend : AppCompatActivity() {
             switchSend.isEnabled=false
             infoForUser("Задайте имя устройства и ключ безопасности в настройках приложения", Toast.LENGTH_LONG)
         }}
-    var ListArraySend = arrayListOf<BitSet>() //здесь храним посылки
-    private val arrayFiles = arrayOfNulls<Uri>(3)
-    private var count: Int = 0
-    private var flagSend: Boolean = true
-    private var flagComplete: Boolean = false
+
     private fun statusPack(source:CharSequence, messageForUser:String, colorText:Int)
     {
         var arrayText = source.split("...")
@@ -278,7 +284,17 @@ class MainActivitySend : AppCompatActivity() {
             buffersize,
             AudioTrack.MODE_STREAM,
             AUDIO_SESSION_ID_GENERATE)
+        var result : Int=0
+        var audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         trackplayer.play() // включаем проигрывание
+        val afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
+            if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                trackplayer.pause()
+            } else if (focusChange == AUDIOFOCUS_GAIN) {
+                trackplayer.play() }
+            else if (focusChange == AUDIOFOCUS_GAIN_TRANSIENT) {
+            trackplayer.pause()
+            } }
         var arrayData: BitSet = BitSet(ListArraySend.count()*256)
         var tempcountArray=0
         withContext(Dispatchers.Main) {
@@ -297,19 +313,38 @@ class MainActivitySend : AppCompatActivity() {
                 return } }
         if (flagSend) {
             withContext(Dispatchers.Main) {
-                statusPack(InfoAddFiles.text,"Идет передача ", Color.BLACK)
+                statusPack(InfoAddFiles.text, "Идет передача ", Color.BLACK)
             }
+            if (Build.VERSION.SDK_INT < 26 )  { // для разных версии андрод разные подходы с смене аудиофокуса
+                result = audioManager.requestAudioFocus(
+                    afChangeListener,
+                    AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN) }
+            else { var focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                    setAudioAttributes(AudioAttributes.Builder().run {
+                        setUsage(AudioAttributes.USAGE_GAME)
+                        setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        build() })
+                    setAcceptsDelayedFocusGain(true) //асинхронная обработка запроса фокуса
+                    setOnAudioFocusChangeListener(afChangeListener)
+                    build() } }
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { // получили аудиофокус
+                if (audioManager.isMicrophoneMute) { // включаем микрофон и соответственно питание мк
+                    audioManager.setMicrophoneMute(false)
+                }
             if (trackplayer.write(
-                arrayData.toByteArray(),
-                0,
-                buffersize)>=0) // пишем данные в цап мобильного
+                    arrayData.toByteArray(),
+                    0,
+                    buffersize
+                ) >= 0 ) // пишем данные в цап мобильного , которые примет ацп мк
             { withContext(Dispatchers.Main)
-                { statusPack(InfoAddFiles.text,"Отправлено! ", Color.GREEN) }
-            }
-            else { withContext(Dispatchers.Main)
-                { statusPack(InfoAddFiles.text,"Ошибка при передаче! ", Color.RED)
-                } }
-        }
+                { statusPack(InfoAddFiles.text, "Отправлено! ", Color.GREEN) }
+            } else {
+                withContext(Dispatchers.Main)
+                {
+                    statusPack(InfoAddFiles.text, "Ошибка при передаче! ", Color.RED)
+                }
+            } } }
         else {
             withContext(Dispatchers.Main)
             { statusPack(InfoAddFiles.text,"Прервано! ", Color.RED)
