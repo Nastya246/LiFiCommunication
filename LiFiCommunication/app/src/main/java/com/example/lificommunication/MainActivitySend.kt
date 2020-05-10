@@ -11,7 +11,6 @@ import android.media.AudioFormat.CHANNEL_OUT_MONO
 import android.media.AudioFormat.ENCODING_PCM_16BIT
 import android.media.AudioManager
 import android.media.AudioManager.*
-import android.media.AudioTrack
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -33,7 +32,8 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.*
 import kotlin.experimental.xor
-
+import android.media.AudioTrack
+import android.R.attr.data
 
 class RC4 (key: ByteArray){
     var perestanovki = IntArray (256, {0})
@@ -108,9 +108,11 @@ class MainActivitySend : AppCompatActivity() {
     private var flagSend: Boolean = true
     private var flagComplete: Boolean = false
     private var ListArraySend = arrayListOf<BitSet>() //здесь храним посылки
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_send)
+        var audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         InfoAddFiles.setTextColor(Color.GRAY)
         InfoAddFiles.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f)
         val fileInputDataUser: FileInputStream = openFileInput("dataUser.txt") //файл с именем уст-ва и паролем
@@ -150,6 +152,7 @@ class MainActivitySend : AppCompatActivity() {
                     if (isChecked) flagSend = true
                     else {
                         flagSend = false
+                        if (!audioManager.isMicrophoneMute) audioManager.setMicrophoneMute(true)
                         infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT) } } } }
     else {
             switchSend.isEnabled=false
@@ -269,7 +272,7 @@ class MainActivitySend : AppCompatActivity() {
 
     private suspend fun sendInformation() {
         var buffersize = AudioTrack.getMinBufferSize(
-            44100,  //устанавливаем частоту с запасом
+            8000,  //устанавливаем частоту с запасом
             AudioFormat.CHANNEL_OUT_MONO, // данные идут в левый канал, поэтому моно
             AudioFormat.ENCODING_PCM_16BIT)
         var trackplayer = AudioTrack(
@@ -284,9 +287,19 @@ class MainActivitySend : AppCompatActivity() {
             buffersize,
             AudioTrack.MODE_STREAM,
             AUDIO_SESSION_ID_GENERATE)
-        var result : Int=0
         var audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        trackplayer.setPlaybackPositionUpdateListener(object: AudioTrack.OnPlaybackPositionUpdateListener {
+            override fun onMarkerReached(trackplayer: AudioTrack) {
+                    audioManager.setMicrophoneMute(true)
+                    statusPack(InfoAddFiles.text, "Отправлено! ", Color.GREEN) }
+            override fun onPeriodicNotification(trackplayer: AudioTrack) {
+            }
+        })
+
+        var result : Int=0
         trackplayer.play() // включаем проигрывание
+
         val afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
             if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 trackplayer.pause()
@@ -295,6 +308,7 @@ class MainActivitySend : AppCompatActivity() {
             else if (focusChange == AUDIOFOCUS_GAIN_TRANSIENT) {
             trackplayer.pause()
             } }
+
         var arrayData: BitSet = BitSet(ListArraySend.count()*256)
         var tempcountArray=0
         withContext(Dispatchers.Main) {
@@ -311,6 +325,7 @@ class MainActivitySend : AppCompatActivity() {
                 { statusPack(InfoAddFiles.text,"Прервано! ", Color.RED)
                 }
                 return } }
+        trackplayer.setNotificationMarkerPosition(buffersize/2)
         if (flagSend) {
             withContext(Dispatchers.Main) {
                 statusPack(InfoAddFiles.text, "Идет передача ", Color.BLACK)
@@ -337,9 +352,7 @@ class MainActivitySend : AppCompatActivity() {
                     0,
                     buffersize
                 ) >= 0 ) // пишем данные в цап мобильного , которые примет ацп мк
-            { withContext(Dispatchers.Main)
-                { statusPack(InfoAddFiles.text, "Отправлено! ", Color.GREEN) }
-            } else {
+            { } else {
                 withContext(Dispatchers.Main)
                 {
                     statusPack(InfoAddFiles.text, "Ошибка при передаче! ", Color.RED)
