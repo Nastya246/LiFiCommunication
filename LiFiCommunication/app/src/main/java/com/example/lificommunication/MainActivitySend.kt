@@ -98,7 +98,6 @@ fun crcPack (packData:BitSet): BitSet  {//подсчет crc и преобраз
         crcIntArrayPack[n]=crcPackString[n].toInt().toByte()
     }
     val crcBit: BitSet = (BitSet.valueOf(crcIntArrayPack.toByteArray())).get(0, crcIntArrayPack.size) //crc в битах
-
     return crcBit
 }
 
@@ -152,10 +151,9 @@ class MainActivitySend : AppCompatActivity() {
                     if (isChecked) flagSend = true
                     else {
                         flagSend = false
-                        if (!audioManager.isMicrophoneMute) audioManager.setMicrophoneMute(true)
+                        audioManager.setMicrophoneMute(true)
                         infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT) } } } }
-    else {
-            switchSend.isEnabled=false
+    else { switchSend.isEnabled=false
             infoForUser("Задайте имя устройства и ключ безопасности в настройках приложения", Toast.LENGTH_LONG)
         }}
 
@@ -200,8 +198,7 @@ class MainActivitySend : AppCompatActivity() {
             infoForUser("Нет выбранных файлов", Toast.LENGTH_SHORT)
         }
     else {
-            infoForUser("Дождитесь окончания операции", Toast.LENGTH_LONG)
-        }}
+            infoForUser("Дождитесь окончания операции", Toast.LENGTH_LONG) }}
 
     private suspend fun packageCreate(dataUsers: ByteArray) {
         var countIndex = 0
@@ -267,8 +264,7 @@ class MainActivitySend : AppCompatActivity() {
             unitPackSend = sendPackTemp
             ListArraySend.add(unitPackSend) //добавляем в глобальную переменную преобразованные данные для дальнейшей отправки
             countIndex++
-        } while (outCircle <= size-1)
-    }
+        } while (outCircle <= size-1) }
 
     private suspend fun sendInformation() {
         var buffersize = AudioTrack.getMinBufferSize(
@@ -294,8 +290,7 @@ class MainActivitySend : AppCompatActivity() {
                     audioManager.setMicrophoneMute(true)
                     statusPack(InfoAddFiles.text, "Отправлено! ", Color.GREEN) }
             override fun onPeriodicNotification(trackplayer: AudioTrack) {
-            }
-        })
+            } })
 
         var result : Int=0
         trackplayer.play() // включаем проигрывание
@@ -344,9 +339,8 @@ class MainActivitySend : AppCompatActivity() {
                     setOnAudioFocusChangeListener(afChangeListener)
                     build() } }
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { // получили аудиофокус
-                if (audioManager.isMicrophoneMute) { // включаем микрофон и соответственно питание мк
+                 // включаем микрофон и соответственно питание мк
                     audioManager.setMicrophoneMute(false)
-                }
             if (trackplayer.write(
                     arrayData.toByteArray(),
                     0,
@@ -423,6 +417,7 @@ class MainActivitySend : AppCompatActivity() {
                     val keyForUnitsFile = "LightFile".toByteArray() //это ключ для шифрования данных файла
                     val encoderFile: RC4 = RC4(keyForUnitsFile)
                     val encoderResultFile= encoderFile.encode(fileUser, fileUser.size) //шифрование файла
+
                     InfoAddFiles.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
                     var arrayText = InfoAddFiles.text.split("...")
                     InfoAddFiles.setTextColor(Color.BLUE)

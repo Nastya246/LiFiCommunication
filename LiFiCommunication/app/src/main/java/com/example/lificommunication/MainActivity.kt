@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         var audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (!audioManager.isMicrophoneMute) audioManager.setMicrophoneMute(true)
+        audioManager.setMicrophoneMute(true)
     }
     //открыть экран для режима отправки
     fun sendActivity (view: View) {
