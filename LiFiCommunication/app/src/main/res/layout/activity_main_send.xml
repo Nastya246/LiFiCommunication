@@ -149,6 +149,15 @@
             app:srcCompat="@drawable/ic_add_black_48dp" />
 
         <ImageButton
+            android:id="@+id/buttonMinusFile"
+            android:layout_width="136dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@color/buttonBackground"
+            android:onClick="removeFile"
+            app:srcCompat="@drawable/ic_remove_black_48dp" />
+
+        <ImageButton
             android:id="@+id/buttonSend"
             android:layout_width="136dp"
             android:layout_height="50dp"
@@ -196,6 +205,17 @@
             android:background="@color/buttonBackground"
             android:onClick="addFile"
             android:text="Добавить файл"
+            android:textAlignment="center"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/minusFileTxt"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"
+            android:background="@color/buttonBackground"
+            android:onClick="removeFile"
+            android:text="Убрать файл"
             android:textAlignment="center"
             android:textSize="12sp" />
 

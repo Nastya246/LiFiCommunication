@@ -34,6 +34,9 @@ import java.util.*
 import kotlin.experimental.xor
 import android.media.AudioTrack
 import android.R.attr.data
+import android.media.AudioTrack.WRITE_NON_BLOCKING
+import android.widget.Button
+import androidx.core.content.ContextCompat.startActivity
 
 class RC4 (key: ByteArray){
     var perestanovki = IntArray (256, {0})
@@ -186,17 +189,20 @@ class MainActivitySend : AppCompatActivity() {
         } }
 
      fun sendData(view: View?) {
-        if (flagComplete) {
+         if (arrayFiles[0]==null) {
+             infoForUser("Нет выбранных файлов", Toast.LENGTH_SHORT)
+         }
+        else if (flagComplete) {
             if (!flagSend) {
-            infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT)
-        }
+                minusFileTxt.setEnabled(true)
+                buttonMinusFile.setEnabled(true)
+            infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT) }
         else {
+                minusFileTxt.setEnabled(false)
+                buttonMinusFile.setEnabled(false)
             val taskSend = GlobalScope.launch {
                 if (flagSend) sendInformation()
             } }}
-    else if (arrayFiles[0]==null) {
-            infoForUser("Нет выбранных файлов", Toast.LENGTH_SHORT)
-        }
     else {
             infoForUser("Дождитесь окончания операции", Toast.LENGTH_LONG) }}
 
@@ -267,7 +273,7 @@ class MainActivitySend : AppCompatActivity() {
         } while (outCircle <= size-1) }
 
     private suspend fun sendInformation() {
-        var buffersize = AudioTrack.getMinBufferSize(
+        val buffersize = AudioTrack.getMinBufferSize(
             8000,  //устанавливаем частоту с запасом
             AudioFormat.CHANNEL_OUT_MONO, // данные идут в левый канал, поэтому моно
             AudioFormat.ENCODING_PCM_16BIT)
@@ -287,6 +293,8 @@ class MainActivitySend : AppCompatActivity() {
 
         trackplayer.setPlaybackPositionUpdateListener(object: AudioTrack.OnPlaybackPositionUpdateListener {
             override fun onMarkerReached(trackplayer: AudioTrack) {
+                     minusFileTxt.setEnabled(true)
+                     buttonMinusFile.setEnabled(true)
                     audioManager.setMicrophoneMute(true)
                     statusPack(InfoAddFiles.text, "Отправлено! ", Color.GREEN) }
             override fun onPeriodicNotification(trackplayer: AudioTrack) {
@@ -299,10 +307,12 @@ class MainActivitySend : AppCompatActivity() {
             if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 trackplayer.stop()
                 statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED)
-            } else if (focusChange == AUDIOFOCUS_GAIN) { }
+                audioManager.setMicrophoneMute(true)
+            } else if (focusChange == AUDIOFOCUS_GAIN) {audioManager.setMicrophoneMute(false) }
             else if (focusChange == AUDIOFOCUS_GAIN_TRANSIENT) {
             trackplayer.stop()
                 statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED)
+                audioManager.setMicrophoneMute(true)
             }}
 
         var arrayData: BitSet = BitSet(ListArraySend.count()*256)
@@ -351,11 +361,13 @@ class MainActivitySend : AppCompatActivity() {
                 withContext(Dispatchers.Main)
                 {
                     statusPack(InfoAddFiles.text, "Ошибка при передаче! ", Color.RED)
+                    audioManager.setMicrophoneMute(true)
                 }
             } } }
         else {
             withContext(Dispatchers.Main)
             { statusPack(InfoAddFiles.text,"Прервано! ", Color.RED)
+                audioManager.setMicrophoneMute(true)
             }
             return } }
 
@@ -363,7 +375,7 @@ class MainActivitySend : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 111 && resultCode == RESULT_OK) {
             flagComplete=false
-            if (InfoAddFiles.text.contains("Отправлено!")) {
+            if (InfoAddFiles.text.contains("Отправлено!") || InfoAddFiles.text.contains("Ошибка")) {
                 arrayFiles[0] = null
                 arrayFiles[1] = null
                 arrayFiles[2] = null
@@ -440,6 +452,49 @@ class MainActivitySend : AppCompatActivity() {
                             InfoAddFiles.setText(arrayText[0])
                         } } } } } } } }
 
+    private fun removeListSend() {
+        var packZero: BitSet = BitSet(256)
+        var splitCount=0
+        val countElem = ListArraySend.count() - 1
+        for (i in countElem downTo 0) {
+            if (packZero == ListArraySend[i]) splitCount++
+            if (splitCount == 4) break
+            ListArraySend.removeAt(i)
+        } }
+    fun removeFile(view: View?) //удаление последнего добавленного элемента
+    {   if (InfoAddFiles.text.contains("Отправлено!") || InfoAddFiles.text.contains("Ошибка")) {
+       for (i in 0..2) arrayFiles[i] = null
+        count = 0
+        val pasw = ListArraySend[0]
+        val name = ListArraySend[2]
+        ListArraySend.clear()
+        InfoAddFiles.setText("")
+        GlobalScope.launch() {
+            ListArraySend.add(pasw)
+            splitPackage()
+            ListArraySend.add(name)
+            splitPackage() } }
+    else if (InfoAddFiles.text==null || InfoAddFiles.text=="") {
+        infoForUser("Нет выбранных файлов!", Toast.LENGTH_SHORT) }
+    else
+    { var arrayFileName = InfoAddFiles.text.split('\n') //разбиваем на массив
+        if (arrayFiles[2]!=null)
+        {   InfoAddFiles.setText(arrayFileName[0]+"\n"+arrayFileName[1]+"\n")
+            arrayFiles[2]=null
+            count=2
+            removeListSend()
+        }
+        else if (arrayFiles[1]!=null)
+    {   InfoAddFiles.setText(arrayFileName[0]+"\n")
+        arrayFiles[1]=null
+        count=1
+        removeListSend()  }
+        else if (arrayFiles[0]!=null)
+        {   InfoAddFiles.setText("")
+            count=0
+            arrayFiles[0]=null
+            removeListSend()
+        } }}
     fun sendMain (view: View) {
         val sendMain = Intent(this, MainActivity::class.java)
         startActivity(sendMain)
