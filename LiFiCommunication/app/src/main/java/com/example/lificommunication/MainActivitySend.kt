@@ -155,6 +155,8 @@ class MainActivitySend : AppCompatActivity() {
                     else {
                         flagSend = false
                         audioManager.setMicrophoneMute(true)
+                        minusFileTxt.setEnabled(true)
+                        buttonMinusFile.setEnabled(true)
                         infoForUser("Вы отключили режим передачи", Toast.LENGTH_SHORT) } } } }
     else { switchSend.isEnabled=false
             infoForUser("Задайте имя устройства и ключ безопасности в настройках приложения", Toast.LENGTH_LONG)
