@@ -11,11 +11,12 @@
 
     <Switch
         android:id="@+id/switchSend"
-        android:layout_width="322dp"
-        android:layout_height="43dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="64dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="5dp"
         android:buttonTint="#00FFC107"
         android:checked="true"
         android:text="Передача данных"
@@ -24,6 +25,7 @@
         android:textOn="Вкл"
         android:textSize="18sp"
         android:thumbTint="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,12 +33,14 @@
     <View
 
         android:id="@+id/divider"
-        android:layout_width="385dp"
+        android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="5dp"
         android:background="@color/Divider"
+        app:layout_constraintBottom_toTopOf="@+id/LabelCommunication"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switchSend" />
@@ -44,12 +48,14 @@
     <View
 
         android:id="@+id/divider2"
-        android:layout_width="385dp"
+        android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="64dp"
+        android:layout_marginStart="1dp"
         android:layout_marginTop="5dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="5dp"
         android:background="@color/Divider"
+        app:layout_constraintBottom_toTopOf="@+id/InfoLabelSend"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,19 +64,19 @@
     <TextView
         android:id="@+id/LabelCommunication"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
         android:text="Коммуникация "
         android:textColor="@color/colorPrimaryDark"
         android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/InfoAboutCommunication"
         app:layout_constraintStart_toStartOf="@+id/switchSend"
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <TextView
         android:id="@+id/InfoAboutCommunication"
         android:layout_width="335dp"
-        android:layout_height="43dp"
-        android:layout_marginTop="3dp"
+        android:layout_height="0dp"
         android:text="Нажмите на имя устройства, чтобы получить детальную информацию"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/LabelCommunication"
@@ -79,11 +85,12 @@
     <TextView
         android:id="@+id/InfoLabelSend"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="3dp"
         android:text="Отправка"
         android:textColor="@android:color/black"
         android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/ScrollSend"
         app:layout_constraintStart_toStartOf="@+id/nameDeviceConnectSend"
         app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
@@ -91,10 +98,13 @@
         android:id="@+id/ScrollSend"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="1dp"
         android:fillViewport="true"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbarSize="5dp"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -106,6 +116,7 @@
             android:layout_width="319dp"
             android:layout_height="43dp"
             android:layout_marginTop="16dp"
+            android:scrollbarAlwaysDrawVerticalTrack="false"
             android:scrollbars="vertical"
             android:scrollHorizontally="false"
             android:singleLine="false"
@@ -117,7 +128,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout3"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
@@ -159,17 +170,15 @@
     <TextView
         android:id="@+id/nameDeviceConnectSend"
         android:layout_width="326dp"
-        android:layout_height="34dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
         android:clickable="true"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/divider2"
         app:layout_constraintStart_toStartOf="@+id/InfoAboutCommunication"
         app:layout_constraintTop_toBottomOf="@+id/InfoAboutCommunication" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="20dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"

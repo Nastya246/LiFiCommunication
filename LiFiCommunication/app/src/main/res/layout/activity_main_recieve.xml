@@ -10,23 +10,26 @@
     <TextView
         android:id="@+id/infoLabelReceive"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="3dp"
         android:text="Входящие файлы"
         android:textColor="@android:color/black"
         android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/ScrollReceive"
         app:layout_constraintStart_toStartOf="@+id/nameDeviceConnectReceive"
         app:layout_constraintTop_toBottomOf="@+id/divider12" />
 
     <View
 
         android:id="@+id/divider12"
-        android:layout_width="385dp"
+        android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="5dp"
         android:background="@color/Divider"
+        app:layout_constraintBottom_toTopOf="@+id/infoLabelReceive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameDeviceConnectReceive" />
@@ -34,10 +37,10 @@
     <TextView
         android:id="@+id/nameDeviceConnectReceive"
         android:layout_width="332dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="16dp"
-        android:text="Имя устройства"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:clickable="true"
+        android:text="Имя устройства"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="@+id/infoAboutCommunicationReceive"
         app:layout_constraintTop_toBottomOf="@+id/infoAboutCommunicationReceive"
@@ -46,16 +49,16 @@
     <TextView
         android:id="@+id/infoAboutCommunicationReceive"
         android:layout_width="335dp"
-        android:layout_height="43dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="0dp"
         android:text="Нажмите на имя устройства, чтобы получить детальную информацию"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/labelCommunication5"
         app:layout_constraintTop_toBottomOf="@+id/labelCommunication5" />
 
     <TextView
         android:id="@+id/labelCommunication5"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:text="Коммуникация с устройством"
         android:textColor="@color/colorPrimaryDark"
@@ -66,43 +69,44 @@
     <View
 
         android:id="@+id/divider11"
-        android:layout_width="385dp"
+        android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="1dp"
         android:background="@color/Divider"
+        app:layout_constraintBottom_toTopOf="@+id/labelCommunication5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switchReceive" />
 
     <Switch
         android:id="@+id/switchReceive"
-        android:layout_width="322dp"
-        android:layout_height="43dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="64dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="5dp"
         android:buttonTint="#00FFC107"
+        android:checked="false"
         android:text="Прием данных"
         android:textAlignment="textStart"
-        android:checked="false"
         android:textOff="Выкл"
         android:textOn="Вкл"
         android:textSize="18sp"
         android:thumbTint="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/divider11"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:id="@+id/ScrollReceive"
-        android:layout_width="409dp"
-        android:layout_height="300dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="1dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -111,10 +115,10 @@
 
         <TextView
             android:id="@+id/InfoReceiveFiles"
-            android:layout_width="380dp"
-            android:layout_height="400dp"
-            android:layout_marginTop="60dp"
+            android:layout_width="319dp"
+            android:layout_height="43dp"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp"
             android:scrollbars="vertical"
             android:scrollHorizontally="false"
@@ -127,7 +131,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout5"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
@@ -149,7 +153,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="20dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"

@@ -298,13 +298,12 @@ class MainActivitySend : AppCompatActivity() {
         val afChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
             if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 trackplayer.stop()
-            } else if (focusChange == AUDIOFOCUS_GAIN) {
-                statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED)}
+                statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED)
+            } else if (focusChange == AUDIOFOCUS_GAIN) { }
             else if (focusChange == AUDIOFOCUS_GAIN_TRANSIENT) {
             trackplayer.stop()
-            } else if (focusChange == AUDIOFOCUS_LOSS) {
-                trackplayer.stop()
-                statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED) }}
+                statusPack(InfoAddFiles.text, "Передача была прервана! Повторите отправку", Color.RED)
+            }}
 
         var arrayData: BitSet = BitSet(ListArraySend.count()*256)
         var tempcountArray=0

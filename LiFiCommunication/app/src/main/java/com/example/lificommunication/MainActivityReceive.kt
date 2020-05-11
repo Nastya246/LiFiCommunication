@@ -86,7 +86,7 @@ class MainActivityReceive: AppCompatActivity() {
             return
         }
 
-        if (textView != null) {
+             if (textView != null) {
             textView.setOnClickListener {
                 showWarning("Ваш ключ - $password")
             }
