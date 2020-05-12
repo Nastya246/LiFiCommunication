@@ -2,9 +2,9 @@ package com.example.lificommunication
 
 import android.content.Context
 import android.content.Intent
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
+import android.media.*
+import android.media.AudioManager.*
+import android.os.Build
 import android.os.Bundle
 import android.os.Process.setThreadPriority
 import android.view.Gravity
@@ -14,8 +14,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main_recieve.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -41,6 +43,8 @@ class MainActivityReceive: AppCompatActivity() {
     private var dataNamePassword = "" //считываемые данные из файла
     private var password = "" //пароль заданный пользователем
     private var nameDevice = "" //имя заданное пользователем
+
+    private val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +119,7 @@ class MainActivityReceive: AppCompatActivity() {
         showWarning.show()
     }
 
-    private fun userConfirm(dataUsers: ByteArray) {
+    private suspend fun userConfirm(dataUsers: ByteArray) {
         if (flagReceive) {
             val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(
                 0,
@@ -131,12 +135,16 @@ class MainActivityReceive: AppCompatActivity() {
                     if (resultUnitPasswordDecoder === password) {
                         userLogin = true
                         userPassword = true
-                        nameDeviceConnectReceive.append(System.getProperty("line.separator"))
-                        nameDeviceConnectReceive.append(resultUnitNameDecoder) //отображение имени передающего устройства
+                        withContext(Dispatchers.Main) {
+                            nameDeviceConnectReceive.append(System.getProperty("line.separator"))
+                            nameDeviceConnectReceive.append(resultUnitNameDecoder) //отображение имени передающего устройства
+                        }
                     } else { //если данные не совпали
                         audioRunning = false
-                        switch.setEnabled(false)
-                        showWarning("Данные не совпали, запросите их заново.")
+                        withContext(Dispatchers.Main) {
+                            switch.setEnabled(false)
+                            showWarning("Данные не совпали, запросите их заново.")
+                        }
                     }
                 }
 
@@ -183,24 +191,30 @@ class MainActivityReceive: AppCompatActivity() {
                 }
             } else { //если сумма не сошлась
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Данные не совпали, запросите их заново.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    showWarning("Данные не совпали, запросите их заново.")
+                }
                 return
             }
         } else {
             audioRunning = false
-            switch.setEnabled(false)
-            showWarning("Вы отключили режим приема.")
+            withContext(Dispatchers.Main) {
+                switch.setEnabled(false)
+                showWarning("Вы отключили режим приема.")
+            }
             return
         }
     }
 
-    private fun fileCreate(dataUsers: ByteArray) {
+    private suspend fun fileCreate(dataUsers: ByteArray) {
         if (flagReceive) {
             if (countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Прием данных окончен.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    showWarning("Прием данных окончен.")
+                }
                 return
             }
 
@@ -221,13 +235,17 @@ class MainActivityReceive: AppCompatActivity() {
                     }
                     countPartFile = 0
                     countFiles++
-                    showWarning("Файл $resultFileNameDecoder загружен.")
+                    withContext(Dispatchers.Main) {
+                        showWarning("Файл $resultFileNameDecoder загружен.")
+                    }
                 }
 
                 if (countFiles == 3) {//проверка что приняты все файлы
                     audioRunning = false
-                    switch.setEnabled(false)
-                    showWarning("Прием данных окончен.")
+                    withContext(Dispatchers.Main) {
+                        switch.setEnabled(false)
+                        showWarning("Прием данных окончен.")
+                    }
                 }
 
                 return
@@ -283,14 +301,18 @@ class MainActivityReceive: AppCompatActivity() {
                 }
             } else { //если сумма не сошлась
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Файл поврежден, повторите попытку передачи.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    showWarning("Файл поврежден, повторите попытку передачи.")
+                }
                 return
             }
         } else {
             audioRunning = false
-            switch.setEnabled(false)
-            showWarning("Вы отключили режим приема.")
+            withContext(Dispatchers.Main) {
+                switch.setEnabled(false)
+                showWarning("Вы отключили режим приема.")
+            }
             return
         }
     }
@@ -299,25 +321,53 @@ class MainActivityReceive: AppCompatActivity() {
         if(flagReceive) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
+            var result = 0
             var dataRecord: ByteArray = byteArrayOf() //здесь буду храниться считанные байты с приемопередатчика для дальнейшей обработки
             val minBufferSize = AudioRecord.getMinBufferSize(
                 8000,  //устанавливаем частоту, частота 44100Гц для всех устройств, которая поддерживается, где-то может быть больше
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
-                AudioFormat.ENCODING_PCM_16BIT //формат входных данных, более известный как кодек
+                AudioFormat.ENCODING_PCM_8BIT //формат входных данных, более известный как кодек
             )
+
+            val changeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
+                if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                    audioManager.setMicrophoneMute(true)
+                    switch.setEnabled(false)
+                    flagReceive = false
+                    showWarning("Прием прерван, повторите попытку.")
+                }
+                else if (focusChange == AUDIOFOCUS_GAIN) {
+                    audioManager.setMicrophoneMute(false)
+                    switch.setEnabled(false)
+                    flagReceive = false
+                    showWarning("Прием прерван, повторите попытку.")
+                }
+                else if (focusChange == AUDIOFOCUS_GAIN_TRANSIENT) {
+                    audioManager.setMicrophoneMute(true)
+                    switch.setEnabled(false)
+                    flagReceive = false
+                    showWarning("Прием прерван, повторите попытку.")
+                }
+            }
 
             if (minBufferSize == AudioRecord.ERROR) {
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Что-то пошло не так, повторите попытку передачи.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    audioManager.setMicrophoneMute(true)
+                    showWarning("Что-то пошло не так, повторите попытку передачи.")
+                }
                 System.err.println("getMinBufferSize returned ERROR")
                 return
             }
 
             if (minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Что-то пошло не так, повторите попытку передачи.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    audioManager.setMicrophoneMute(true)
+                    showWarning("Что-то пошло не так, повторите попытку передачи.")
+                }
                 System.err.println("getMinBufferSize returned ERROR_BAD_VALUE")
                 return
             }
@@ -332,8 +382,11 @@ class MainActivityReceive: AppCompatActivity() {
 
             if (audioData.state != AudioRecord.STATE_INITIALIZED) {
                 audioRunning = false
-                switch.setEnabled(false)
-                showWarning("Что-то пошло не так, повторите попытку передачи.")
+                withContext(Dispatchers.Main) {
+                    switch.setEnabled(false)
+                    audioManager.setMicrophoneMute(true)
+                    showWarning("Что-то пошло не так, повторите попытку передачи.")
+                }
                 System.err.println("getState() != STATE_INITIALIZED")
                 return
             }
@@ -347,37 +400,72 @@ class MainActivityReceive: AppCompatActivity() {
 
             while (audioRunning) {
                 if (flagReceive) {
-                    val samplesRead: Int = audioData.read( //считывание данных
-                        dataRecord,
-                        0,
-                        32
-                    )
-
-                    if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
-                        audioRunning = false
-                        switch.setEnabled(false)
-                        showWarning("Что-то пошло не так, повторите попытку передачи.")
-                        System.err.println("read() returned ERROR_INVALID_OPERATION")
-                        return
+                    if (Build.VERSION.SDK_INT < 26 )  { // для разных версии андрод разные подходы с смене аудиофокуса
+                        result = audioManager.requestAudioFocus(
+                            changeListener,
+                            AudioManager.STREAM_MUSIC,
+                            AudioManager.AUDIOFOCUS_GAIN)
+                    } else {
+                        var focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                            setAudioAttributes(AudioAttributes.Builder().run {
+                                setUsage(AudioAttributes.USAGE_GAME)
+                                setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                build()})
+                            setAcceptsDelayedFocusGain(true) //асинхронная обработка запроса фокуса
+                            setOnAudioFocusChangeListener(changeListener)
+                            build()}
                     }
 
-                    if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
-                        audioRunning = false
-                        switch.setEnabled(false)
-                        showWarning("Файл поврежден, повторите попытку передачи.")
-                        System.err.println("read() returned ERROR_BAD_VALUE")
-                        return
-                    }
+                    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                        val samplesRead: Int = audioData.read( //считывание данных
+                            dataRecord,
+                            0,
+                            32
+                        )
 
-                    if (userLogin && userPassword) {
-                        fileCreate(dataRecord)
-                    } else if (samplesRead == 32) {//посылаем данные на обработку
-                        userConfirm(dataRecord)
+                        if (samplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                            audioRunning = false
+                            withContext(Dispatchers.Main) {
+                                switch.setEnabled(false)
+                                audioManager.setMicrophoneMute(true)
+                                showWarning("Что-то пошло не так, повторите попытку передачи.")
+                            }
+                            System.err.println("read() returned ERROR_INVALID_OPERATION")
+                            return
+                        }
+
+                        if (samplesRead == AudioRecord.ERROR_BAD_VALUE) {
+                            audioRunning = false
+                            withContext(Dispatchers.Main) {
+                                switch.setEnabled(false)
+                                audioManager.setMicrophoneMute(true)
+                                showWarning("Файл поврежден, повторите попытку передачи.")
+                            }
+                            System.err.println("read() returned ERROR_BAD_VALUE")
+                            return
+                        }
+
+                        if (userLogin && userPassword) {
+                            fileCreate(dataRecord)
+                        } else if (samplesRead == 32) {//посылаем данные на обработку
+                            userConfirm(dataRecord)
+                        }
+                    } else {
+                        audioRunning = false
+                        withContext(Dispatchers.Main) {
+                            switch.setEnabled(false)
+                            audioManager.setMicrophoneMute(true)
+                            showWarning("Прием остановлен, данные утеряны.")
+                        }
+                        return
                     }
                 } else {
                     audioRunning = false
-                    switch.setEnabled(false)
-                    showWarning("Прием остановлен пользователем, данные утеряны.")
+                    withContext(Dispatchers.Main) {
+                        switch.setEnabled(false)
+                        audioManager.setMicrophoneMute(true)
+                        showWarning("Прием остановлен пользователем, данные утеряны.")
+                    }
                     return
                 }
             }
@@ -395,8 +483,11 @@ class MainActivityReceive: AppCompatActivity() {
                 audioData.release()
             }
         } else {
-            switch.setEnabled(false)
-            showWarning("Прием данных отключен.")
+            withContext(Dispatchers.Main) {
+                switch.setEnabled(false)
+                audioManager.setMicrophoneMute(true)
+                showWarning("Прием данных отключен.")
+            }
             return
         }
     }
