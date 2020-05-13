@@ -44,7 +44,7 @@ class MainActivityReceive: AppCompatActivity() {
     private var password = "" //пароль заданный пользователем
     private var nameDevice = "" //имя заданное пользователем
 
-    private val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -328,7 +328,7 @@ class MainActivityReceive: AppCompatActivity() {
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
                 AudioFormat.ENCODING_PCM_8BIT //формат входных данных, более известный как кодек
             )
-
+             val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val changeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
                 if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     audioManager.setMicrophoneMute(true)
@@ -483,6 +483,7 @@ class MainActivityReceive: AppCompatActivity() {
                 audioData.release()
             }
         } else {
+             val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             withContext(Dispatchers.Main) {
                 switch.setEnabled(false)
                 audioManager.setMicrophoneMute(true)
