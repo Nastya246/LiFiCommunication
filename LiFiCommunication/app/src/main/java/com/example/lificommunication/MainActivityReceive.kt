@@ -44,8 +44,6 @@ class MainActivityReceive: AppCompatActivity() {
     private var password = "" //пароль заданный пользователем
     private var nameDevice = "" //имя заданное пользователем
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_recieve)
@@ -120,6 +118,7 @@ class MainActivityReceive: AppCompatActivity() {
     }
 
     private suspend fun userConfirm(dataUsers: ByteArray) {
+        val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (flagReceive) {
             val dataBitsUsers: BitSet = BitSet.valueOf(dataUsers).get(
                 0,
@@ -142,6 +141,7 @@ class MainActivityReceive: AppCompatActivity() {
                     } else { //если данные не совпали
                         audioRunning = false
                         withContext(Dispatchers.Main) {
+                            audioManager.setMicrophoneMute(true)
                             switch.setEnabled(false)
                             showWarning("Данные не совпали, запросите их заново.")
                         }
@@ -192,6 +192,7 @@ class MainActivityReceive: AppCompatActivity() {
             } else { //если сумма не сошлась
                 audioRunning = false
                 withContext(Dispatchers.Main) {
+                    audioManager.setMicrophoneMute(true)
                     switch.setEnabled(false)
                     showWarning("Данные не совпали, запросите их заново.")
                 }
@@ -200,6 +201,7 @@ class MainActivityReceive: AppCompatActivity() {
         } else {
             audioRunning = false
             withContext(Dispatchers.Main) {
+                audioManager.setMicrophoneMute(true)
                 switch.setEnabled(false)
                 showWarning("Вы отключили режим приема.")
             }
@@ -208,10 +210,12 @@ class MainActivityReceive: AppCompatActivity() {
     }
 
     private suspend fun fileCreate(dataUsers: ByteArray) {
+        val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (flagReceive) {
             if (countFiles >= 1 && dataUsers.isEmpty()) {//проверка что приняты все файлы
                 audioRunning = false
                 withContext(Dispatchers.Main) {
+                    audioManager.setMicrophoneMute(true)
                     switch.setEnabled(false)
                     showWarning("Прием данных окончен.")
                 }
@@ -243,6 +247,7 @@ class MainActivityReceive: AppCompatActivity() {
                 if (countFiles == 3) {//проверка что приняты все файлы
                     audioRunning = false
                     withContext(Dispatchers.Main) {
+                        audioManager.setMicrophoneMute(true)
                         switch.setEnabled(false)
                         showWarning("Прием данных окончен.")
                     }
@@ -302,6 +307,7 @@ class MainActivityReceive: AppCompatActivity() {
             } else { //если сумма не сошлась
                 audioRunning = false
                 withContext(Dispatchers.Main) {
+                    audioManager.setMicrophoneMute(true)
                     switch.setEnabled(false)
                     showWarning("Файл поврежден, повторите попытку передачи.")
                 }
@@ -310,6 +316,7 @@ class MainActivityReceive: AppCompatActivity() {
         } else {
             audioRunning = false
             withContext(Dispatchers.Main) {
+                audioManager.setMicrophoneMute(true)
                 switch.setEnabled(false)
                 showWarning("Вы отключили режим приема.")
             }
@@ -318,6 +325,7 @@ class MainActivityReceive: AppCompatActivity() {
     }
 
     private suspend fun receiveData () {
+        val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if(flagReceive) {
             setThreadPriority(-19) //приоритет для потока обработки аудио
             audioRunning = true
@@ -328,7 +336,6 @@ class MainActivityReceive: AppCompatActivity() {
                 AudioFormat.CHANNEL_OUT_FRONT_RIGHT, //принимаем через правый канал
                 AudioFormat.ENCODING_PCM_8BIT //формат входных данных, более известный как кодек
             )
-             val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val changeListener = AudioManager.OnAudioFocusChangeListener { focusChange -> //слушаетль смены аудиофокуса
                 if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                     audioManager.setMicrophoneMute(true)
@@ -483,7 +490,6 @@ class MainActivityReceive: AppCompatActivity() {
                 audioData.release()
             }
         } else {
-             val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             withContext(Dispatchers.Main) {
                 switch.setEnabled(false)
                 audioManager.setMicrophoneMute(true)
